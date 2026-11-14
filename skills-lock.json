@@ -91,12 +91,6 @@
       "skillPath": "skills/base/grilling/SKILL.md",
       "computedHash": "a88da81b774b0ae3b7d729231e296da0e404f8af1db1efb5d5cbb8d1ebabd19c"
     },
-    "migrate-radix-to-base": {
-      "source": "shadcn/ui",
-      "sourceType": "github",
-      "skillPath": "skills/migrate-radix-to-base/SKILL.md",
-      "computedHash": "7644de21e9aa533904def58c30f809ae6574c3cabc6396ab8b03dee751e8ffbe"
-    },
     "organization-best-practices": {
       "source": "better-auth/skills",
       "sourceType": "github",
@@ -109,65 +103,11 @@
       "skillPath": "skills/base/self-grilling/SKILL.md",
       "computedHash": "54a7c13a6c0cb3338eae372a10ced31c39e7250c9a1495ec57c9c0a1968c585c"
     },
-    "shadcn": {
-      "source": "shadcn/ui",
-      "sourceType": "github",
-      "skillPath": "skills/shadcn/SKILL.md",
-      "computedHash": "c60d0a14a6c6f798b07e51093d9627917ca3425b92f5d419eaa57b9b15be89de"
-    },
-    "tanstack-ai": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-ai/skills/tanstack-ai/SKILL.md",
-      "computedHash": "0c8930b992047bb9ed7c364f91e8e517017369b5e318652d2e20fd70ef67cff8"
-    },
-    "tanstack-cli": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-cli/skills/tanstack-cli/SKILL.md",
-      "computedHash": "a7d45000ad66035ba283dc6486e2aca62f0553f9fefd052043b14c034e6be024"
-    },
-    "tanstack-config": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-config/skills/tanstack-config/SKILL.md",
-      "computedHash": "4647a2de0c6e9bfa93ff7721eb51cfd43ff926e4856e5ae6af5ebe43730681c4"
-    },
-    "tanstack-db": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-db/skills/tanstack-db/SKILL.md",
-      "computedHash": "11e626e3adcb9a0278344d1367d7c9cef0ad26a110cbc3bb77da398afd6b5a15"
-    },
-    "tanstack-devtools": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-devtools/skills/tanstack-devtools/SKILL.md",
-      "computedHash": "84ba7bbeed4ca18cd7180a34671d4074a9bd5e3884ed3e63d9a9e4e0ba458756"
-    },
-    "tanstack-form": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-form/skills/tanstack-form/SKILL.md",
-      "computedHash": "430501f64ccd9122d446b9e4e411c143427bc5f0ce0f9d78a6eb8d2a056c3a6d"
-    },
-    "tanstack-pacer": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-pacer/skills/tanstack-pacer/SKILL.md",
-      "computedHash": "a45e990e07b578537206429e70ebc24c8bcbda5c8ce2aa36549d2ddaf8b37b7e"
-    },
     "tanstack-query": {
       "source": "tanstack-skills/tanstack-skills",
       "sourceType": "github",
       "skillPath": "plugins/tanstack-query/skills/tanstack-query/SKILL.md",
       "computedHash": "b27696896a18acff7cb9099d753effb74bdf4b4339881f941fea4cca56abb1fa"
-    },
-    "tanstack-ranger": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-ranger/skills/tanstack-ranger/SKILL.md",
-      "computedHash": "8334006ed4fb96b1c53401d0256741895ce936ed9b6c045bd2cdb121f6c9295e"
     },
     "tanstack-router": {
       "source": "tanstack-skills/tanstack-skills",
@@ -180,24 +120,6 @@
       "sourceType": "github",
       "skillPath": "plugins/tanstack-start/skills/tanstack-start/SKILL.md",
       "computedHash": "639fa82b4266c720b0b8927cac9d3d22248c354ad36fffdbdcf5675b9d94f32a"
-    },
-    "tanstack-store": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-store/skills/tanstack-store/SKILL.md",
-      "computedHash": "7cd83f88dd14a8bb3964581efc00595c5456bc940e2aabe145e8fcf9a1ad6c04"
-    },
-    "tanstack-table": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-table/skills/tanstack-table/SKILL.md",
-      "computedHash": "235873fdbb88facf6b7df204a71b822e575e72cf3ce2c0628a0405b0d0db2620"
-    },
-    "tanstack-virtual": {
-      "source": "tanstack-skills/tanstack-skills",
-      "sourceType": "github",
-      "skillPath": "plugins/tanstack-virtual/skills/tanstack-virtual/SKILL.md",
-      "computedHash": "e322b98ce04e6e5d206ef041b0b16078d26506c98f38ba565e553925c3da9bc5"
     },
     "two-factor-authentication-best-practices": {
       "source": "better-auth/skills",

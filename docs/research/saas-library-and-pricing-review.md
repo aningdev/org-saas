@@ -1,5 +1,7 @@
 # SaaS 技能实践、定价与架构核查
 
+> **历史快照**：本报告写于 React / shadcn 主站时期（2026-10-20）。主站已迁至 Solid 2 + ui-sdk（见 [ADR-0003](../adr/0003-solid-2-ui-sdk.md)）；文中对 React Form/Table/Query、`packages/ui` 的对照仅作当时基线记录，不以当前栈为准。定价与商业结论仍可参考。
+>
 > 调查日期：2026-10-20。审阅基线为仓库 HEAD `dd4b89ced0d0e243219f7380654edb9eedd8eb2c`；开始检查时 `git status --short` 为空。本报告记录基线审查和随后落地的低风险修正；价格结构仍是未批准的讨论候选，不构成商业规则。
 >
 > 来源边界：逐项阅读仓库技能并对照项目代码。参考了 Better Auth、TanStack Start、oRPC 官方文档片段，并直接获取 TanStack Router 的 head 管理文档和 Stripe 官方定价模型说明。滚动文档不固定版本；行为以锁定依赖和本地代码为准。Drizzle 官方文档链接作为后续核对入口，连接文档 URL 返回 404，本报告不声称已直接核实该页面。基线页面文案可用 `git show dd4b89c:apps/web/src/routes/_public/pricing/index.tsx`、`git show dd4b89c:apps/web/src/routes/_public/about/index.tsx` 和 `git show dd4b89c:apps/web/src/routes/_public/-components/footer.tsx` 复现；报告中的工作树文件链接指向修正后的当前版本。

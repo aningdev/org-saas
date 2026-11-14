@@ -19,7 +19,7 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 - `apps/web`：公开页面、认证流程、个人中心和组织业务页面（Solid 2 + TanStack Start）。
 - `apps/fumadocs`：独立文档应用，使用 Fumadocs（React）。
 - `apps/mini`：微信小程序，使用 TDesign、WXML 和 WXSS。
-- `packages/api`、`auth`、`db`、`ui`：共享业务 API、认证、数据访问；`packages/ui` 为遗留 React/shadcn 组件库，主站已改用 ui-sdk。
+- `packages/api`、`auth`、`db`：共享业务 API、认证、数据访问。
 - `packages/env`：环境变量校验；`packages/config`：共享 TypeScript 配置。
 
 本文件适用于整个仓库。子目录文件补充局部约定。
@@ -39,11 +39,10 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 | 认证、会话、组织插件和权限配置 | [packages/auth/AGENTS.md](packages/auth/AGENTS.md)       |
 | 数据模型、关系和数据库变更     | [packages/db/AGENTS.md](packages/db/AGENTS.md)           |
 | 主站 UI（ui-sdk 封装）         | [apps/web/AGENTS.md](apps/web/AGENTS.md)（见 ui-sdk 节） |
-| 遗留 React/shadcn UI           | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)           |
 | 文档内容、文档路由和搜索       | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md)       |
 | 微信小程序页面、组件和样式     | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)               |
 
-框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs / shadcn 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
+框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
 
 ## 跨包约定
 
@@ -67,9 +66,17 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 
 命令从仓库根执行；完整脚本以根及目标包 `package.json` 为准。
 
-- 主站开发：`vp run dev:web`；文档开发：`vp run dev:fumadocs`。
-- 修改代码后运行 `vpr check`，检查并自动修复。
+- 主站开发：`bun run dev:web`；文档开发：`bun run dev:fumadocs`。
+- `bun run check`：格式、lint、类型检查（只读，不改写）。
+- `bun run fix`：自动修复格式与 lint。
+- `bun run test`：根 `tests/` 下的服务端／工具行为测试（`vp test`）。
 - 自动化测试仅验证明确业务风险或复现已知缺陷，不按单元、接口等类型补齐测试，不为覆盖率或数量凑用例。所有测试及辅助文件集中在根 `tests/`；新增、修改、迁移或删除测试以及调整测试配置前，必读 [测试规范](docs/agents/testing.md)。
 
 - 涉及构建、SSR 或生成流程的改动，运行目标应用的构建或对应生成检查；数据库操作遵循 DB 文件的确认边界。
 - 交付说明实际改动、已执行检查及未完成项。检查失败时区分本次引入的问题与既有问题，不将未执行的检查报告为通过。
+
+## Where to read
+
+- 领域词汇：[docs/GLOSSARY.md](docs/GLOSSARY.md)（指向 `docs/architecture/GLOSSARY.md`）
+- 架构约定：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)（指向 `docs/architecture/`）
+- 决策记录：[docs/adr/](docs/adr/)
