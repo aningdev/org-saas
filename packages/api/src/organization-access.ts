@@ -1,10 +1,11 @@
+import { organizationHasPermission } from "@org-saas/auth/organization-has-permission";
 import { resolveOrganizationOwner } from "@org-saas/auth/organization-owner";
 import { and, db, eq } from "@org-saas/db";
 import { member, organization, organizationRole } from "@org-saas/db/schema/auth";
 import { ORPCError } from "@orpc/server";
 
 import type { EffectiveOrganizationOperations } from "./contracts/organization";
-import { getRoleStatements, roleAllows } from "./organization-permissions";
+import { getRoleStatements } from "./organization-permissions";
 
 export function fail(
   code: "CONFLICT" | "FORBIDDEN" | "NOT_FOUND",
@@ -20,58 +21,102 @@ function emptyOperations(): EffectiveOrganizationOperations {
     member: { create: false, update: false, delete: false },
     invitation: { create: false, cancel: false, viewPending: false },
     team: { create: false, update: false, delete: false },
-    roleDefinition: { read: false, create: false, update: false, delete: false },
+    ac: { read: false, create: false, update: false, delete: false },
     audit: { read: false },
   };
 }
 
-function resolveOperations(
-  statements: Record<string, string[]>,
-  isOwner: boolean,
-  archived: boolean,
-): EffectiveOrganizationOperations {
-  if (archived) {
+async function resolveOperationsViaHasPermission(input: {
+  headers: Headers;
+  organizationId: string;
+  isOwner: boolean;
+  archived: boolean;
+}): Promise<EffectiveOrganizationOperations> {
+  if (input.archived) {
     return {
       ...emptyOperations(),
-      organization: { update: false, archive: false, restore: isOwner },
-      audit: { read: isOwner },
+      organization: { update: false, archive: false, restore: input.isOwner },
+      audit: { read: input.isOwner },
     };
   }
 
-  const canCreateInvitations = roleAllows(statements, "invitation", "create");
-  const canCancelInvitations = roleAllows(statements, "invitation", "cancel");
+  const check = (permissions: Record<string, string[]>) =>
+    organizationHasPermission({
+      headers: input.headers,
+      organizationId: input.organizationId,
+      permissions,
+    });
+
+  const [
+    organizationUpdate,
+    memberCreate,
+    memberUpdate,
+    memberDelete,
+    invitationCreate,
+    invitationCancel,
+    teamCreate,
+    teamUpdate,
+    teamDelete,
+    acRead,
+    acCreate,
+    acUpdate,
+    acDelete,
+    auditRead,
+  ] = await Promise.all([
+    check({ organization: ["update"] }),
+    check({ member: ["create"] }),
+    check({ member: ["update"] }),
+    check({ member: ["delete"] }),
+    check({ invitation: ["create"] }),
+    check({ invitation: ["cancel"] }),
+    check({ team: ["create"] }),
+    check({ team: ["update"] }),
+    check({ team: ["delete"] }),
+    check({ ac: ["read"] }),
+    check({ ac: ["create"] }),
+    check({ ac: ["update"] }),
+    check({ ac: ["delete"] }),
+    check({ audit: ["read"] }),
+  ]);
+
   return {
     organization: {
-      update: roleAllows(statements, "organization", "update"),
-      archive: isOwner,
+      update: organizationUpdate,
+      // Product extension: archive/restore are owner-only, not Better Auth statements.
+      archive: input.isOwner,
       restore: false,
     },
     member: {
-      create: roleAllows(statements, "member", "create"),
-      update: roleAllows(statements, "member", "update"),
-      delete: roleAllows(statements, "member", "delete"),
+      create: memberCreate,
+      update: memberUpdate,
+      delete: memberDelete,
     },
     invitation: {
-      create: canCreateInvitations,
-      cancel: canCancelInvitations,
-      viewPending: canCreateInvitations || canCancelInvitations,
+      create: invitationCreate,
+      cancel: invitationCancel,
+      // Product rule: cancel-capable managers may also see pending invites.
+      viewPending: invitationCreate || invitationCancel,
     },
     team: {
-      create: roleAllows(statements, "team", "create"),
-      update: roleAllows(statements, "team", "update"),
-      delete: roleAllows(statements, "team", "delete"),
+      create: teamCreate,
+      update: teamUpdate,
+      delete: teamDelete,
     },
-    roleDefinition: {
-      read: roleAllows(statements, "ac", "read"),
-      create: roleAllows(statements, "ac", "create"),
-      update: roleAllows(statements, "ac", "update"),
-      delete: roleAllows(statements, "ac", "delete"),
+    ac: {
+      read: acRead,
+      create: acCreate,
+      update: acUpdate,
+      delete: acDelete,
     },
-    audit: { read: roleAllows(statements, "audit", "read") },
+    audit: { read: auditRead },
   };
 }
 
-export async function loadOrganizationAccess(organizationId: string, userId: string) {
+export async function loadOrganizationAccess(
+  organizationId: string,
+  userId: string,
+  headers: Headers,
+) {
   const [organizationRow] = await db
     .select({ id: organization.id, archivedAt: organization.archivedAt })
     .from(organization)
@@ -124,14 +169,21 @@ export async function loadOrganizationAccess(organizationId: string, userId: str
       ),
     )
     .limit(1);
+  // Kept for grantable-role comparison; live allow/deny uses Better Auth hasPermission.
   const statements = getRoleStatements(membership.role, customRole?.permission);
+  const operations = await resolveOperationsViaHasPermission({
+    headers,
+    organizationId,
+    isOwner,
+    archived: Boolean(organizationRow.archivedAt),
+  });
 
   return {
     organizationId,
     role: membership.role,
     isOwner,
     archivedAt: organizationRow.archivedAt,
-    operations: resolveOperations(statements, isOwner, Boolean(organizationRow.archivedAt)),
+    operations,
     statements,
   };
 }

@@ -137,13 +137,11 @@ Better Auth 查询参与 SSR 预取时，应核对当前请求凭证的传递；
 当前组织父路由在 `beforeLoad` 中用用户 ID 和显式 slug 调用 `organizationContextBySlugQueryOptions`；该查询调用 [resolveBySlug API](../../packages/api/src/routers/organization.ts)，服务端以该 slug 查询组织，再以当前会话用户 ID 和目标组织 ID 加载成员、状态及操作权限：
 
 1. 共享认证路由提供当前会话用户。
-2. `resolveBySlug` 查询目标 slug，不读取或设置 Better Auth 的 active-organization 状态。
-3. `loadOrganizationAccess(organizationId, userId)` 按成员关系校验身份，并输出 owner、归档状态和动态操作权限。
+2. `resolveBySlug` 查询目标 slug 并校验成员资格；**不**调用 `setActiveOrganization`（本仓 policy 将其视为组织写并占用 `ownerMutationVersion`，不能放在只读导航上）。
+3. `loadOrganizationAccess` 输出 owner、归档状态，以及经由官方 `auth.api.hasPermission` 计算的操作权限 DTO（资源名与 BA 一致，如 `ac`）；归档／恢复等产品扩展仍单独标注。
 4. 路由将用户、目标组织和访问上下文交给子路由，`OrgContext` 再提供页面消费。
 
-查询和业务操作使用显式 orgId；缓存键按当前用户及组织划分。切换 slug 后重新解析服务端上下文，并移除该用户其他组织的业务缓存。
-
-Better Auth 的 active organization 可被其他标准客户端功能使用，但路由授权不把它作为目标组织或成员资格的事实来源。多标签页进入不同组织时，服务端仍根据本次请求的显式组织 ID 和当前成员关系校验访问。
+授权事实是会话 + 成员关系 + `hasPermission`／显式组织 ID。`authClient.organization.*` 写操作应显式传 `organizationId`，不依赖 active organization。查询缓存键按当前用户及组织划分。
 
 ## 已确认的入口与导航规则
 

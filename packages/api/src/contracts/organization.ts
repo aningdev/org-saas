@@ -41,7 +41,8 @@ const effectiveOperationsSchema = z.object({
   member: z.object({ create: z.boolean(), update: z.boolean(), delete: z.boolean() }),
   invitation: z.object({ create: z.boolean(), cancel: z.boolean(), viewPending: z.boolean() }),
   team: z.object({ create: z.boolean(), update: z.boolean(), delete: z.boolean() }),
-  roleDefinition: z.object({
+  // Better Auth access-control resource name (`ac`), not a renamed alias.
+  ac: z.object({
     read: z.boolean(),
     create: z.boolean(),
     update: z.boolean(),

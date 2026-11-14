@@ -18,6 +18,7 @@
 - 复用现有 procedure 和中间件。新增公共访问策略时集中定义，不在路由内复制会话解析或绕过 Better Auth。
 - `protectedImplementer` 通过请求级 `getSession()` 懒加载 Better Auth session，并将非空 session 注入 handler context。getter 仅在单个请求内缓存；不可放入模块级共享状态。
 - `protectedImplementer` 仅保证会话存在。涉及组织的数据，仍需在服务端验证目标组织的访问资格，并将查询限制在该组织范围内；参考 `src/routers/dashboard.ts`。
+- 组织权限允许／拒绝优先走 Better Auth `hasPermission`（见 `loadOrganizationAccess` / `@org-saas/auth/organization-has-permission`）。成员／邀请／角色／团队等突变留在 Better Auth HTTP；本包只补 BA 没有的能力（slug 解析、access-context DTO、归档／恢复、审计列表、聚合）。
 - SSR 与 HTTP 调用使用同一业务处理器，保留相同的输入校验和访问检查。
 
 ## 输入与错误

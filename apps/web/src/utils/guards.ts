@@ -27,22 +27,7 @@ export async function requireSession(_ctx: {
   };
 }
 
-export function requireOrgRole(role: string, allowedRoles: string[]): void {
-  if (!allowedRoles.includes(role)) {
-    throw new ForbiddenError("您没有权限访问此页面", {
-      requiredRole: allowedRoles.join(" | "),
-    });
-  }
-}
-
-export function requireAdmin(role: string): void {
-  requireOrgRole(role, ["admin", "owner"]);
-}
-
-export function requireOwner(role: string): void {
-  requireOrgRole(role, ["owner"]);
-}
-
+/** Gate on access-context operations using Better Auth resource names (`ac`, `member`, …). */
 export function requireOrgOperation(
   access: OrganizationAccessContext,
   resource: string,

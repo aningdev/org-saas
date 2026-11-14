@@ -45,8 +45,7 @@ export function RoleEditorDialog(props: {
 
   const operationMap = () =>
     props.access.operations as unknown as Record<string, Record<string, boolean>>;
-  const allowed = (resource: string, action: string) =>
-    operationMap()[resource === "ac" ? "roleDefinition" : resource]?.[action] === true;
+  const allowed = (resource: string, action: string) => operationMap()[resource]?.[action] === true;
   const withinGrantBoundary = () =>
     Object.entries(permission()).every(([resource, actions]) =>
       actions.every((action) => allowed(resource, action)),

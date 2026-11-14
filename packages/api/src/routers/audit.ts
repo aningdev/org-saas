@@ -8,7 +8,11 @@ import { loadOrganizationAccess } from "../organization-access";
 export const auditRouter = {
   listOrganizationEvents: protectedImplementer.audit.listOrganizationEvents.handler(
     async ({ context, input }) => {
-      const access = await loadOrganizationAccess(input.organizationId, context.session.user.id);
+      const access = await loadOrganizationAccess(
+        input.organizationId,
+        context.session.user.id,
+        context.headers,
+      );
       if (!access.operations.audit.read) {
         throw new ORPCError("FORBIDDEN", {
           message: "You are not allowed to view this organization's audit log.",

@@ -35,7 +35,7 @@ const builtIns = Object.entries(builtInRoles).map(([name, role]) => ({
 
 export const Route = createFileRoute("/_authenticated/org/$orgSlug/_active/roles/")({
   beforeLoad: ({ context }) => {
-    if (!context.access.operations.roleDefinition.read) {
+    if (!context.access.operations.ac.read) {
       throw new ForbiddenError("您没有查看组织角色定义的权限");
     }
   },
@@ -58,9 +58,9 @@ function OrganizationRolesPage() {
   const members = () => orgQuery.data?.members ?? [];
   const invitations = () => orgQuery.data?.invitations ?? [];
   const canViewInvitations = () => orgCtx.access.operations.invitation.viewPending;
-  const canCreate = () => orgCtx.access.operations.roleDefinition.create;
-  const canUpdate = () => orgCtx.access.operations.roleDefinition.update;
-  const canDelete = () => orgCtx.access.operations.roleDefinition.delete;
+  const canCreate = () => orgCtx.access.operations.ac.create;
+  const canUpdate = () => orgCtx.access.operations.ac.update;
+  const canDelete = () => orgCtx.access.operations.ac.delete;
 
   const saveMutation = useMutation(() => ({
     mutationFn: async (value: RoleDraft) => {
@@ -381,9 +381,7 @@ function withinGrantBoundary(
 ): boolean {
   const operations = access.operations as unknown as Record<string, Record<string, boolean>>;
   return Object.entries(permission).every(([resource, actions]) =>
-    actions.every(
-      (action) => operations[resource === "ac" ? "roleDefinition" : resource]?.[action] === true,
-    ),
+    actions.every((action) => operations[resource]?.[action] === true),
   );
 }
 
