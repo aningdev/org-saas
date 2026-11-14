@@ -4,6 +4,7 @@ import {
   TooltipTrigger as TooltipTriggerPrimitive,
 } from "@ui-sdk/solid/tooltip";
 import { omit, type ComponentProps, type ParentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 /** Noop provider for API compatibility with previous TooltipProvider. */

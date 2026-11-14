@@ -1,16 +1,15 @@
-import { Toaster } from "@org-saas/ui/components/toast";
-import { TooltipProvider } from "@org-saas/ui/components/tooltip";
-import { TanStackDevtools } from "@tanstack/react-devtools";
-import { FormDevtoolsPanel } from "@tanstack/react-form-devtools";
-import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import type { JSX } from "@solidjs/web";
+import type { QueryClient } from "@tanstack/solid-query";
+import { createRootRouteWithContext, HeadContent, Scripts } from "@tanstack/solid-router";
+import { TanStackRouterDevtools } from "@tanstack/solid-router-devtools";
+import { Loading } from "solid-js";
 
 import { ForbiddenPage } from "@/components/fallback/forbidden";
 import { NotFoundPage } from "@/components/fallback/not-found";
 import { UnauthorizedPage } from "@/components/fallback/unauthorized";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/ui/toast";
+import { TooltipProvider } from "@/ui/tooltip";
 import { ForbiddenError, NotFoundError, UnauthorizedError } from "@/utils/errors";
 import type { orpc } from "@/utils/orpc";
 
@@ -42,52 +41,36 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       },
     ],
   }),
-  errorComponent: ({ error }) => {
-    if (error instanceof NotFoundError) {
+  errorComponent: (props) => {
+    if (props.error instanceof NotFoundError) {
       return <NotFoundPage />;
     }
-    if (error instanceof ForbiddenError) {
-      return <ForbiddenPage error={error} />;
+    if (props.error instanceof ForbiddenError) {
+      return <ForbiddenPage error={props.error} />;
     }
-    if (error instanceof UnauthorizedError) {
-      return <UnauthorizedPage error={error} />;
+    if (props.error instanceof UnauthorizedError) {
+      return <UnauthorizedPage error={props.error} />;
     }
-    throw error;
+    throw props.error;
   },
-  component: RootDocument,
+  shellComponent: RootDocument,
 });
 
-function RootDocument() {
+function RootDocument(props: { children?: JSX.Element }) {
   return (
-    <html lang="zh" suppressHydrationWarning>
+    <html lang="zh">
       <head>
         <HeadContent />
       </head>
       <body>
         <ThemeProvider defaultTheme="system" storageKey="theme">
-          <div className="min-h-screen">
+          <div class="min-h-screen">
             <TooltipProvider>
-              <Outlet /> <Toaster />
+              <Loading>{props.children}</Loading>
+              <Toaster />
             </TooltipProvider>
           </div>
-          {import.meta.env.DEV && (
-            <TanStackDevtools
-              plugins={[
-                {
-                  name: "TanStack Query",
-                  render: <ReactQueryDevtoolsPanel />,
-                },
-                {
-                  name: "TanStack Router",
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                {
-                  name: "TanStack Form",
-                  render: <FormDevtoolsPanel />,
-                },
-              ]}
-            />
-          )}
+          {import.meta.env.DEV ? <TanStackRouterDevtools /> : null}
         </ThemeProvider>
         <Scripts />
       </body>

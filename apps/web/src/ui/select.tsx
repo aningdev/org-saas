@@ -10,6 +10,7 @@ import {
   type SelectProps as SelectRootProps,
 } from "@ui-sdk/solid/select";
 import { omit, type ComponentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 function Select(props: SelectRootProps) {
@@ -67,7 +68,7 @@ function SelectTrigger(props: SelectTriggerProps) {
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"
-        class="size-4 text-muted-foreground pointer-events-none"
+        class="text-muted-foreground pointer-events-none size-4"
       >
         <path d="m6 9 6 6 6-6" />
       </svg>

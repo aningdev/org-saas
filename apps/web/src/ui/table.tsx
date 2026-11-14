@@ -1,5 +1,6 @@
-import { omit } from "solid-js";
 import type { JSX } from "@solidjs/web";
+import { omit } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 type TableProps = JSX.HTMLAttributes<HTMLTableElement>;
@@ -8,11 +9,7 @@ function Table(props: TableProps) {
   const rest = omit(props, "class");
   return (
     <div data-slot="table-container" class="relative w-full overflow-x-auto">
-      <table
-        data-slot="table"
-        class={cn("w-full caption-bottom text-sm", props.class)}
-        {...rest}
-      />
+      <table data-slot="table" class={cn("w-full caption-bottom text-sm", props.class)} {...rest} />
     </div>
   );
 }
@@ -21,19 +18,13 @@ type TheadProps = JSX.HTMLAttributes<HTMLTableSectionElement>;
 
 function TableHeader(props: TheadProps) {
   const rest = omit(props, "class");
-  return (
-    <thead data-slot="table-header" class={cn("[&_tr]:border-b", props.class)} {...rest} />
-  );
+  return <thead data-slot="table-header" class={cn("[&_tr]:border-b", props.class)} {...rest} />;
 }
 
 function TableBody(props: TheadProps) {
   const rest = omit(props, "class");
   return (
-    <tbody
-      data-slot="table-body"
-      class={cn("[&_tr:last-child]:border-0", props.class)}
-      {...rest}
-    />
+    <tbody data-slot="table-body" class={cn("[&_tr:last-child]:border-0", props.class)} {...rest} />
   );
 }
 

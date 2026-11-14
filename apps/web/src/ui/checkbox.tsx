@@ -1,8 +1,6 @@
-import {
-  Checkbox as CheckboxPrimitive,
-  CheckboxIndicator,
-} from "@ui-sdk/solid/checkbox";
+import { Checkbox as CheckboxPrimitive, CheckboxIndicator } from "@ui-sdk/solid/checkbox";
 import { omit, type ComponentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 type CheckboxProps = ComponentProps<typeof CheckboxPrimitive>;

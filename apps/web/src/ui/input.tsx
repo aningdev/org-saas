@@ -1,5 +1,6 @@
 import { Input as InputPrimitive } from "@ui-sdk/solid/input";
 import { omit, type ComponentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 type InputProps = ComponentProps<typeof InputPrimitive>;

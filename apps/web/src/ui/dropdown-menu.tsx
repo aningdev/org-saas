@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   Menu,
   MenuCheckboxItem,
@@ -15,7 +16,7 @@ import {
   MenuTrigger,
 } from "@ui-sdk/solid/menu";
 import { omit, type ComponentProps } from "solid-js";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 type DropdownMenuProps = ComponentProps<typeof Menu>;

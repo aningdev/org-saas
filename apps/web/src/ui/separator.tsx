@@ -1,5 +1,6 @@
 import { Separator as SeparatorPrimitive } from "@ui-sdk/solid/separator";
 import { omit, type ComponentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 type SeparatorProps = ComponentProps<typeof SeparatorPrimitive>;

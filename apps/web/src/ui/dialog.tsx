@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   Dialog as DialogPrimitive,
   DialogBackdrop,
@@ -8,7 +9,7 @@ import {
   DialogTrigger as DialogTriggerPrimitive,
 } from "@ui-sdk/solid/dialog";
 import { omit, type ComponentProps } from "solid-js";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 type DialogProps = ComponentProps<typeof DialogPrimitive>;
@@ -66,7 +67,7 @@ function DialogContent(props: DialogContentProps) {
         {props.showCloseButton !== false && (
           <DialogClosePrimitive
             data-slot="dialog-close"
-            class="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            class="text-muted-foreground hover:bg-muted hover:text-foreground absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md transition-colors"
             aria-label="Close"
           >
             <svg
@@ -93,9 +94,7 @@ type DivProps = JSX.HTMLAttributes<HTMLDivElement>;
 
 function DialogHeader(props: DivProps) {
   const rest = omit(props, "class");
-  return (
-    <div data-slot="dialog-header" class={cn("flex flex-col gap-2", props.class)} {...rest} />
-  );
+  return <div data-slot="dialog-header" class={cn("flex flex-col gap-2", props.class)} {...rest} />;
 }
 
 function DialogFooter(props: DivProps) {

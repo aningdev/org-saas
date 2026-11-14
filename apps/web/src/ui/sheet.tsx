@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   Drawer,
   DrawerBackdrop,
@@ -15,7 +16,7 @@ import {
   useContext,
   type ComponentProps,
 } from "solid-js";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 type SheetSide = "top" | "right" | "bottom" | "left";
@@ -110,7 +111,7 @@ function SheetContent(props: SheetContentProps) {
         {props.showCloseButton !== false && (
           <DrawerClosePrimitive
             data-slot="sheet-close"
-            class="absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            class="text-muted-foreground hover:bg-muted hover:text-foreground absolute top-4 right-4 inline-flex size-8 items-center justify-center rounded-md transition-colors"
             aria-label="Close"
           >
             <svg
@@ -138,11 +139,7 @@ type DivProps = JSX.HTMLAttributes<HTMLDivElement>;
 function SheetHeader(props: DivProps) {
   const rest = omit(props, "class");
   return (
-    <div
-      data-slot="sheet-header"
-      class={cn("flex flex-col gap-1.5 p-4", props.class)}
-      {...rest}
-    />
+    <div data-slot="sheet-header" class={cn("flex flex-col gap-1.5 p-4", props.class)} {...rest} />
   );
 }
 

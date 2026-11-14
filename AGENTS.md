@@ -14,31 +14,36 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 
 ## 项目与边界
 
-多组织 SaaS Monorepo，使用 Bun Workspaces。主站采用 TanStack Start / Router、React、oRPC、Better Auth 和 Drizzle / PostgreSQL；共享 UI 使用 shadcn / Base UI。
+多组织 SaaS Monorepo，使用 Bun Workspaces。主站采用 TanStack Start / Router、Solid 2.0 RC、oRPC、Better Auth 和 Drizzle / PostgreSQL；主站 UI 使用 `@ui-sdk/solid`（封装见 `apps/web/src/ui/`）。文档站仍为 React / Fumadocs。
 
-- `apps/web`：公开页面、认证流程、个人中心和组织业务页面。
-- `apps/fumadocs`：独立文档应用，使用 Fumadocs。
+- `apps/web`：公开页面、认证流程、个人中心和组织业务页面（Solid 2 + TanStack Start）。
+- `apps/fumadocs`：独立文档应用，使用 Fumadocs（React）。
 - `apps/mini`：微信小程序，使用 TDesign、WXML 和 WXSS。
-- `packages/api`、`auth`、`db`、`ui`：共享业务 API、认证、数据访问和 Web UI。
+- `packages/api`、`auth`、`db`、`ui`：共享业务 API、认证、数据访问；`packages/ui` 为遗留 React/shadcn 组件库，主站已改用 ui-sdk。
 - `packages/env`：环境变量校验；`packages/config`：共享 TypeScript 配置。
 
-本文件适用于整个仓库。子目录文件补充局部约定；React、shadcn、Tailwind 和 Lucide 约定仅适用于对应的 Web 应用及组件库。
+本文件适用于整个仓库。子目录文件补充局部约定。
+
+### ui-sdk
+
+使用 ui-sdk 前，若已安装 `ui-sdk` skill 则先遵循该 skill，并阅读 `node_modules/@ui-sdk/solid/docs/llms.txt`。要构建新组件时，再按标题检索 `node_modules/@ui-sdk/solid/docs/core.md`，并阅读同目录下的 `rendering.md`。
 
 ## 按任务读取
 
 开始修改前，读取涉及目录的 `AGENTS.md`；跨包任务组合读取相关文件。
 
-| 任务                           | 必读文件                                           |
-| ------------------------------ | -------------------------------------------------- |
-| 主站页面、路由、SSR、数据交互  | [apps/web/AGENTS.md](apps/web/AGENTS.md)           |
-| 业务 RPC、服务端校验和错误处理 | [packages/api/AGENTS.md](packages/api/AGENTS.md)   |
-| 认证、会话、组织插件和权限配置 | [packages/auth/AGENTS.md](packages/auth/AGENTS.md) |
-| 数据模型、关系和数据库变更     | [packages/db/AGENTS.md](packages/db/AGENTS.md)     |
-| 共享组件、Base UI 和主题       | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)     |
-| 文档内容、文档路由和搜索       | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md) |
-| 微信小程序页面、组件和样式     | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)         |
+| 任务                           | 必读文件                                                 |
+| ------------------------------ | -------------------------------------------------------- |
+| 主站页面、路由、SSR、数据交互  | [apps/web/AGENTS.md](apps/web/AGENTS.md)                 |
+| 业务 RPC、服务端校验和错误处理 | [packages/api/AGENTS.md](packages/api/AGENTS.md)         |
+| 认证、会话、组织插件和权限配置 | [packages/auth/AGENTS.md](packages/auth/AGENTS.md)       |
+| 数据模型、关系和数据库变更     | [packages/db/AGENTS.md](packages/db/AGENTS.md)           |
+| 主站 UI（ui-sdk 封装）         | [apps/web/AGENTS.md](apps/web/AGENTS.md)（见 ui-sdk 节） |
+| 遗留 React/shadcn UI           | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)           |
+| 文档内容、文档路由和搜索       | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md)       |
+| 微信小程序页面、组件和样式     | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)               |
 
-框架细节按任务读取已提供的技能：路由用 `tanstack-router`，SSR / Server Functions 用 `tanstack-start`，查询、表单、表格分别用 `tanstack-query`、`tanstack-form`、`tanstack-table`；组件用 `shadcn`，认证用对应 Better Auth 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
+框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs / shadcn 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
 
 ## 跨包约定
 

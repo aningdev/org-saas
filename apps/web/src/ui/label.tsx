@@ -1,5 +1,6 @@
 import { Label as LabelPrimitive } from "@ui-sdk/solid/label";
 import { omit, type ComponentProps } from "solid-js";
+
 import { cn } from "@/lib/cn";
 
 type LabelProps = ComponentProps<typeof LabelPrimitive>;

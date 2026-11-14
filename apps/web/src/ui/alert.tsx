@@ -1,6 +1,7 @@
+import type { JSX } from "@solidjs/web";
 import { cva, type VariantProps } from "class-variance-authority";
 import { omit } from "solid-js";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 const alertVariants = cva(

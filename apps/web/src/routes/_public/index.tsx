@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/solid-query";
 import { createFileRoute } from "@tanstack/solid-router";
 import { Loading } from "solid-js";
 
-import { orpc } from "@/utils/orpc";
+import { client } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_public/")({
   component: HomeComponent,
@@ -25,7 +25,10 @@ const TITLE_TEXT = `
  `;
 
 function HomeComponent() {
-  const healthCheck = useQuery(() => orpc.healthCheck.queryOptions());
+  const healthCheck = useQuery(() => ({
+    queryKey: ["healthCheck"] as const,
+    queryFn: () => client.healthCheck(),
+  }));
 
   return (
     <div class="container mx-auto max-w-3xl px-4 py-2">

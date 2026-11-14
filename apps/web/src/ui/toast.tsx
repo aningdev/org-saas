@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   createToaster,
   Toast,
@@ -8,7 +9,7 @@ import {
   ToastTitle,
   type ToastType,
 } from "@ui-sdk/solid/toast";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 const toaster = createToaster();
@@ -78,12 +79,12 @@ function Toaster() {
         >
           <div class="flex min-w-0 flex-1 flex-col gap-1">
             <ToastTitle class="text-sm font-medium" />
-            <ToastDescription class="text-sm text-muted-foreground" />
+            <ToastDescription class="text-muted-foreground text-sm" />
           </div>
-          <ToastAction class="shrink-0 rounded-md border border-border bg-background px-2 py-1 text-xs font-medium hover:bg-muted" />
+          <ToastAction class="border-border bg-background hover:bg-muted shrink-0 rounded-md border px-2 py-1 text-xs font-medium" />
           <ToastClose
             aria-label="Close toast"
-            class="relative shrink-0 rounded-md p-1 text-muted-foreground hover:text-foreground"
+            class="text-muted-foreground hover:text-foreground relative shrink-0 rounded-md p-1"
           >
             <svg
               viewBox="0 0 24 24"
