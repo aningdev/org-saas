@@ -6,6 +6,6 @@
   "scripts": {},
   "dependencies": {
     "dayjs": "^1.11.23",
-    "tdesign-miniprogram": "^1.17.0"
+    "tdesign-miniprogram": "^1.18.0"
   }
 }
