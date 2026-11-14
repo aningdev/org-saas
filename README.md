@@ -57,8 +57,9 @@ org-saas/
 │   ├── api/              # oRPC 契约与业务
 │   ├── auth/             # Better Auth
 │   ├── db/               # Drizzle 模型
-│   ├── env/              # 环境变量校验
-│   └── config/           # 共享 TS 配置
+│   └── env/              # 环境变量校验
+├── tsconfig.base.json    # 共享 TypeScript 基础配置
+├── tsconfig.package.json # 共享包编译配置
 ├── docs/                 # 架构、ADR、实施计划
 └── tests/                # 集中测试
 ```

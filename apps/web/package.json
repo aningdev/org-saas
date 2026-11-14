@@ -30,7 +30,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@org-saas/config": "workspace:*",
     "@solidjs/babel-plugin": "catalog:",
     "@solidjs/vite-plugin": "catalog:",
     "@tailwindcss/vite": "catalog:",

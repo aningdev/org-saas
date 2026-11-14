@@ -75,7 +75,6 @@
     "@org-saas/env": "workspace:*"
   },
   "devDependencies": {
-    "@org-saas/config": "workspace:*",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
