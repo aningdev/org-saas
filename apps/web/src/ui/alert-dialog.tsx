@@ -1,3 +1,4 @@
+import type { JSX } from "@solidjs/web";
 import {
   AlertDialog as AlertDialogPrimitive,
   AlertDialogBackdrop,
@@ -8,7 +9,7 @@ import {
   AlertDialogTrigger as AlertDialogTriggerPrimitive,
 } from "@ui-sdk/solid/alert-dialog";
 import { omit, type ComponentProps } from "solid-js";
-import type { JSX } from "@solidjs/web";
+
 import { cn } from "@/lib/cn";
 
 type AlertDialogProps = ComponentProps<typeof AlertDialogPrimitive>;
@@ -126,13 +127,16 @@ function AlertDialogDescription(props: AlertDialogDescriptionProps) {
   );
 }
 
-function AlertDialogAction(props: AlertDialogCloseProps) {
-  const rest = omit(props, "class");
+function AlertDialogAction(props: AlertDialogCloseProps & { variant?: "default" | "destructive" }) {
+  const rest = omit(props, "class", "variant");
   return (
     <AlertDialogClose
       data-slot="alert-dialog-action"
       class={cn(
-        "inline-flex h-9 items-center justify-center rounded-md bg-primary px-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/80",
+        "inline-flex h-9 items-center justify-center rounded-md px-2.5 text-sm font-medium",
+        props.variant === "destructive"
+          ? "bg-destructive/10 text-destructive hover:bg-destructive/20"
+          : "bg-primary text-primary-foreground hover:bg-primary/80",
         props.class,
       )}
       value="confirm"

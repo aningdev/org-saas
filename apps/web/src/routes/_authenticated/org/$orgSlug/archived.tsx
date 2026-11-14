@@ -1,20 +1,13 @@
-import { Alert } from "@org-saas/ui/components/alert";
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@org-saas/ui/components/card";
-import { toast } from "@org-saas/ui/components/toast";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
-import { ArchiveRestore, ArrowLeft } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
+import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/solid-router";
 
 import { useOrgContext } from "@/lib/org-context";
 import { syncOrganizationCacheAfterChange } from "@/lib/organization-cache";
 import { organizationQueryKeys } from "@/lib/organization-query-keys";
+import { Alert } from "@/ui/alert";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
+import { toast } from "@/ui/toast";
 import { ForbiddenError } from "@/utils/errors";
 import { client } from "@/utils/orpc";
 
@@ -38,50 +31,55 @@ export const Route = createFileRoute("/_authenticated/org/$orgSlug/archived")({
 });
 
 function ArchivedOrganizationPage() {
-  const { org, userId } = useOrgContext();
+  const orgCtx = useOrgContext();
   const navigate = useNavigate();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const queryKey = organizationQueryKeys.archivedStatus(userId, org.id);
-  const { data } = useSuspenseQuery({
-    queryKey,
-    queryFn: () => client.organization.archivedStatus({ organizationId: org.id }),
-  });
+  const statusQuery = useQuery(() => ({
+    queryKey: organizationQueryKeys.archivedStatus(orgCtx.userId, orgCtx.org.id),
+    queryFn: () => client.organization.archivedStatus({ organizationId: orgCtx.org.id }),
+  }));
 
-  const restoreMutation = useMutation({
-    mutationFn: () => client.organization.restore({ organizationId: org.id }),
+  const restoreMutation = useMutation(() => ({
+    mutationFn: () => client.organization.restore({ organizationId: orgCtx.org.id }),
     onSuccess: async () => {
       toast.add({ title: "组织已恢复", type: "success" });
-      await syncOrganizationCacheAfterChange(queryClient, userId, org.id, "organization-restored");
+      await syncOrganizationCacheAfterChange(
+        queryClient,
+        orgCtx.userId,
+        orgCtx.org.id,
+        "organization-restored",
+      );
       await router.invalidate();
-      await navigate({ to: "/org/$orgSlug", params: { orgSlug: data.slug } });
+      await navigate({ to: "/org/$orgSlug", params: { orgSlug: statusQuery.data.slug } });
     },
     onError: (error) => {
       toast.add({ title: error.message || "恢复失败，请重试", type: "error" });
     },
-  });
+  }));
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl items-center p-6">
-      <Card className="w-full">
+    <main class="mx-auto flex min-h-screen max-w-2xl items-center p-6">
+      <Card class="w-full">
         <CardHeader>
           <CardTitle>组织已归档</CardTitle>
-          <CardDescription>{data.name} 已停止普通组织操作。</CardDescription>
+          <CardDescription>{statusQuery.data.name} 已停止普通组织操作。</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent class="flex flex-col gap-4">
           <Alert>
             <p>归档期间组织数据会保留，成员、团队和管理页面暂不可访问。</p>
-            <p className="text-muted-foreground text-sm">
-              归档时间：{new Date(data.archivedAt ?? "").toLocaleString()}
+            <p class="text-muted-foreground text-sm">
+              归档时间：{new Date(statusQuery.data.archivedAt ?? "").toLocaleString()}
             </p>
           </Alert>
-          <div className="flex flex-wrap gap-3">
-            <Button disabled={restoreMutation.isPending} onClick={() => restoreMutation.mutate()}>
-              <ArchiveRestore data-icon="inline-start" />
+          <div class="flex flex-wrap gap-3">
+            <Button
+              disabled={restoreMutation.isPending}
+              onClick={() => void restoreMutation.mutate()}
+            >
               {restoreMutation.isPending ? "恢复中..." : "恢复组织"}
             </Button>
-            <Button nativeButton={false} variant="outline" render={<a href="/me/organizations" />}>
-              <ArrowLeft data-icon="inline-start" />
+            <Button variant="outline" render={(p) => <a {...p} href="/me/organizations" />}>
               返回我的组织
             </Button>
           </div>

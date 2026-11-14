@@ -1,15 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@org-saas/ui/components/card";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Mail, Users, UsersRound } from "lucide-react";
+import { useQuery } from "@tanstack/solid-query";
+import { createFileRoute } from "@tanstack/solid-router";
+import { For } from "solid-js";
 
 import { useOrgContext } from "@/lib/org-context";
 import { organizationQueryKeys } from "@/lib/organization-query-keys";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/card";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_authenticated/org/$orgSlug/_active/")({
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(
+      // @ts-expect-error orpc query utils target react-query option types
       orpc.dashboard.orgStats.queryOptions({
         input: { orgId: context.org.id },
         queryKey: organizationQueryKeys.dashboardStats(context.user.id, context.org.id),
@@ -20,41 +21,41 @@ export const Route = createFileRoute("/_authenticated/org/$orgSlug/_active/")({
 });
 
 function OrgDashboard() {
-  const { org, userId } = useOrgContext();
+  const orgCtx = useOrgContext();
 
-  const { data: stats } = useSuspenseQuery(
+  const statsQuery = useQuery(() =>
+    // @ts-expect-error orpc query utils target react-query option types
     orpc.dashboard.orgStats.queryOptions({
-      input: { orgId: org.id },
-      queryKey: organizationQueryKeys.dashboardStats(userId, org.id),
+      input: { orgId: orgCtx.org.id },
+      queryKey: organizationQueryKeys.dashboardStats(orgCtx.userId, orgCtx.org.id),
     }),
   );
 
-  const statCards = [
-    { label: "成员", value: stats?.memberCount ?? 0, icon: Users },
-    { label: "团队", value: stats?.teamCount ?? 0, icon: UsersRound },
-    {
-      label: "待处理邀请",
-      value: stats?.pendingInvitationCount ?? 0,
-      icon: Mail,
-    },
+  const statCards = () => [
+    { label: "成员", value: statsQuery.data?.memberCount ?? 0 },
+    { label: "团队", value: statsQuery.data?.teamCount ?? 0 },
+    { label: "待处理邀请", value: statsQuery.data?.pendingInvitationCount ?? 0 },
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="mb-6 text-2xl font-bold">{org.name}</h1>
+    <div class="p-6">
+      <h1 class="mb-6 text-2xl font-bold">{orgCtx.org.name}</h1>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        {statCards.map(({ label, value, icon: Icon }) => (
-          <Card key={label}>
-            <CardHeader className="flex-row items-center justify-between pb-2">
-              <CardTitle className="text-muted-foreground text-sm font-medium">{label}</CardTitle>
-              <Icon className="text-muted-foreground size-4" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">{value}</p>
-            </CardContent>
-          </Card>
-        ))}
+      <div class="grid gap-4 sm:grid-cols-3">
+        <For each={statCards()}>
+          {(card) => (
+            <Card>
+              <CardHeader class="flex-row items-center justify-between pb-2">
+                <CardTitle class="text-muted-foreground text-sm font-medium">
+                  {card.label}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p class="text-2xl font-bold">{card.value}</p>
+              </CardContent>
+            </Card>
+          )}
+        </For>
       </div>
     </div>
   );

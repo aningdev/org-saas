@@ -1,5 +1,13 @@
 import { roles as builtInRoles } from "@org-saas/auth/permissions";
-import { Alert, AlertDescription, AlertTitle } from "@org-saas/ui/components/alert";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/solid-query";
+import { createFileRoute } from "@tanstack/solid-router";
+import { createSignal, For, Show } from "solid-js";
+
+import { authClient } from "@/lib/auth-client";
+import { useOrgContext } from "@/lib/org-context";
+import { syncOrganizationCacheAfterChange } from "@/lib/organization-cache";
+import { organizationFullQueryOptions, organizationRolesQueryOptions } from "@/lib/query-options";
+import { Alert, AlertDescription, AlertTitle } from "@/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,34 +17,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@org-saas/ui/components/alert-dialog";
-import { Badge } from "@org-saas/ui/components/badge";
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@org-saas/ui/components/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@org-saas/ui/components/table";
-import { toast } from "@org-saas/ui/components/toast";
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Copy, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-
-import { authClient } from "@/lib/auth-client";
-import { useOrgContext } from "@/lib/org-context";
-import { syncOrganizationCacheAfterChange } from "@/lib/organization-cache";
-import { organizationFullQueryOptions, organizationRolesQueryOptions } from "@/lib/query-options";
+} from "@/ui/alert-dialog";
+import { Badge } from "@/ui/badge";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/table";
+import { toast } from "@/ui/toast";
 import { ForbiddenError } from "@/utils/errors";
 
 import { RoleEditorDialog, type RoleDraft } from "./-components/role-editor-dialog";
@@ -62,32 +48,32 @@ export const Route = createFileRoute("/_authenticated/org/$orgSlug/_active/roles
 });
 
 function OrganizationRolesPage() {
-  const { access, org, userId } = useOrgContext();
+  const orgCtx = useOrgContext();
   const queryClient = useQueryClient();
-  const [draft, setDraft] = useState<RoleDraft | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
-  const [roleFeedback, setRoleFeedback] = useState<string | null>(null);
-  const rolesQuery = useQuery(organizationRolesQueryOptions(userId, org.id));
-  const { data: organizationData } = useSuspenseQuery(organizationFullQueryOptions(userId, org.id));
-  const members = organizationData?.members ?? [];
-  const invitations = organizationData?.invitations ?? [];
-  const canViewInvitations = access.operations.invitation.viewPending;
-  const canCreate = access.operations.roleDefinition.create;
-  const canUpdate = access.operations.roleDefinition.update;
-  const canDelete = access.operations.roleDefinition.delete;
+  const [draft, setDraft] = createSignal<RoleDraft | null>(null);
+  const [deleteTarget, setDeleteTarget] = createSignal<{ id: string; name: string } | null>(null);
+  const [roleFeedback, setRoleFeedback] = createSignal<string | null>(null);
+  const rolesQuery = useQuery(() => organizationRolesQueryOptions(orgCtx.userId, orgCtx.org.id));
+  const orgQuery = useQuery(() => organizationFullQueryOptions(orgCtx.userId, orgCtx.org.id));
+  const members = () => orgQuery.data?.members ?? [];
+  const invitations = () => orgQuery.data?.invitations ?? [];
+  const canViewInvitations = () => orgCtx.access.operations.invitation.viewPending;
+  const canCreate = () => orgCtx.access.operations.roleDefinition.create;
+  const canUpdate = () => orgCtx.access.operations.roleDefinition.update;
+  const canDelete = () => orgCtx.access.operations.roleDefinition.delete;
 
-  const saveMutation = useMutation({
+  const saveMutation = useMutation(() => ({
     mutationFn: async (value: RoleDraft) => {
       if (value.id) {
         const result = await authClient.organization.updateRole({
-          organizationId: org.id,
+          organizationId: orgCtx.org.id,
           roleId: value.id,
           data: { roleName: value.name, permission: value.permission },
         });
         if (result.error) throw new Error(result.error.message ?? "保存角色失败");
       } else {
         const result = await authClient.organization.createRole({
-          organizationId: org.id,
+          organizationId: orgCtx.org.id,
           role: value.name,
           permission: value.permission,
         });
@@ -95,10 +81,11 @@ function OrganizationRolesPage() {
       }
     },
     onSuccess: async () => {
+      setDraft(null);
       await syncOrganizationCacheAfterChange(
         queryClient,
-        userId,
-        org.id,
+        orgCtx.userId,
+        orgCtx.org.id,
         "role-definition-changed",
       );
     },
@@ -107,21 +94,22 @@ function OrganizationRolesPage() {
       setRoleFeedback(message);
       toast.add({ title: message, type: "error" });
     },
-  });
+  }));
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutation(() => ({
     mutationFn: async (roleId: string) => {
       const result = await authClient.organization.deleteRole({
-        organizationId: org.id,
+        organizationId: orgCtx.org.id,
         roleId,
       });
       if (result.error) throw new Error(result.error.message ?? "删除角色失败");
     },
     onSuccess: async () => {
+      setDeleteTarget(null);
       await syncOrganizationCacheAfterChange(
         queryClient,
-        userId,
-        org.id,
+        orgCtx.userId,
+        orgCtx.org.id,
         "role-definition-changed",
       );
     },
@@ -130,82 +118,83 @@ function OrganizationRolesPage() {
       setRoleFeedback(message);
       toast.add({ title: message, type: "error" });
     },
-  });
+  }));
 
   const openDraft = (value: RoleDraft) => {
     setRoleFeedback(null);
     setDraft(value);
   };
 
-  const memberCount = (role: string) => members.filter((member) => member.role === role).length;
+  const memberCount = (role: string) => members().filter((member) => member.role === role).length;
   const invitationCount = (role: string) =>
-    invitations.filter((invitation) => invitation.status === "pending" && invitation.role === role)
-      .length;
+    invitations().filter(
+      (invitation) => invitation.status === "pending" && invitation.role === role,
+    ).length;
 
   return (
-    <div className="flex flex-col gap-6 p-6">
-      <div className="flex items-start justify-between gap-4">
+    <div class="flex flex-col gap-6 p-6">
+      <div class="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">组织角色</h1>
-          <p className="text-muted-foreground text-sm">
+          <h1 class="text-2xl font-bold">组织角色</h1>
+          <p class="text-muted-foreground text-sm">
             预置角色只读；自定义角色仅组合服务端支持且当前操作者可授予的权限。
           </p>
         </div>
-        {canCreate && (
-          <Button onClick={() => openDraft({ name: "", permission: {} })}>
-            <Plus data-icon="inline-start" />
-            创建角色
-          </Button>
-        )}
+        <Show when={canCreate()}>
+          <Button onClick={() => openDraft({ name: "", permission: {} })}>创建角色</Button>
+        </Show>
       </div>
 
-      {roleFeedback && (
-        <Alert variant="destructive">
-          <AlertTitle>角色操作未完成</AlertTitle>
-          <AlertDescription>{roleFeedback}</AlertDescription>
-          <p className="text-sm">
-            如果角色仍被使用，请先在成员页面调整成员角色；待处理邀请需要有邀请权限的成员先取消。
-          </p>
-        </Alert>
-      )}
+      <Show when={roleFeedback()}>
+        {(feedback) => (
+          <Alert variant="destructive">
+            <AlertTitle>角色操作未完成</AlertTitle>
+            <AlertDescription>{feedback()}</AlertDescription>
+            <p class="text-sm">
+              如果角色仍被使用，请先在成员页面调整成员角色；待处理邀请需要有邀请权限的成员先取消。
+            </p>
+          </Alert>
+        )}
+      </Show>
 
-      <section className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">预置角色</h2>
-        <div className="grid gap-4 md:grid-cols-3">
-          {builtIns.map(({ name, permission }) => (
-            <Card key={name}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>{name}</span>
-                  <Badge variant="outline">预置 · 只读</Badge>
-                </CardTitle>
-                <CardDescription>平台维护的组织角色定义。</CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                <PermissionBadges permission={permission} />
-                {canCreate && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      openDraft({
-                        name: `${name}-copy`,
-                        permission: Object.fromEntries(
-                          Object.entries(permission).map(([resource, actions]) => [
-                            resource,
-                            [...actions],
-                          ]),
-                        ),
-                      })
-                    }
-                  >
-                    <Copy data-icon="inline-start" />
-                    复制权限
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+      <section class="flex flex-col gap-4">
+        <h2 class="text-lg font-semibold">预置角色</h2>
+        <div class="grid gap-4 md:grid-cols-3">
+          <For each={builtIns}>
+            {(item) => (
+              <Card>
+                <CardHeader>
+                  <CardTitle class="flex items-center justify-between">
+                    <span>{item.name}</span>
+                    <Badge variant="outline">预置 · 只读</Badge>
+                  </CardTitle>
+                  <CardDescription>平台维护的组织角色定义。</CardDescription>
+                </CardHeader>
+                <CardContent class="flex flex-col gap-3">
+                  <PermissionBadges permission={item.permission} />
+                  <Show when={canCreate()}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        openDraft({
+                          name: `${item.name}-copy`,
+                          permission: Object.fromEntries(
+                            Object.entries(item.permission).map(([resource, actions]) => [
+                              resource,
+                              [...actions],
+                            ]),
+                          ),
+                        })
+                      }
+                    >
+                      复制权限
+                    </Button>
+                  </Show>
+                </CardContent>
+              </Card>
+            )}
+          </For>
         </div>
       </section>
 
@@ -217,118 +206,135 @@ function OrganizationRolesPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {rolesQuery.isPending ? (
-            <p className="text-muted-foreground text-sm">正在读取角色…</p>
-          ) : rolesQuery.isError ? (
-            <Alert variant="destructive">
-              <AlertTitle>无法读取角色</AlertTitle>
-              <AlertDescription>{rolesQuery.error.message}</AlertDescription>
-            </Alert>
-          ) : rolesQuery.data.length === 0 ? (
-            <p className="text-muted-foreground py-8 text-center text-sm">尚未创建自定义角色</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>角色</TableHead>
-                  <TableHead>权限</TableHead>
-                  <TableHead>成员</TableHead>
-                  <TableHead>待处理邀请</TableHead>
-                  <TableHead className="w-40">操作</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rolesQuery.data.map((role) => {
-                  const permission = normalizePermission(role.permission);
-                  const assignedMembers = memberCount(role.role);
-                  const pendingInvitations = invitationCount(role.role);
-                  const grantable = withinGrantBoundary(permission, access);
-                  const adminEquivalent = hasAdminPermissions(permission);
-                  const protectedRole = adminEquivalent && !access.isOwner;
-                  const blockedByReferences =
-                    assignedMembers > 0 || (canViewInvitations && pendingInvitations > 0);
-
-                  return (
-                    <TableRow key={role.id}>
-                      <TableCell className="font-medium">{role.role}</TableCell>
-                      <TableCell>
-                        <PermissionBadges permission={permission} />
-                      </TableCell>
-                      <TableCell>{assignedMembers}</TableCell>
-                      <TableCell>{canViewInvitations ? pendingInvitations : "受限"}</TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          {canUpdate && grantable && !protectedRole && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                openDraft({
-                                  id: role.id,
-                                  name: role.role,
-                                  permission,
-                                })
-                              }
-                            >
-                              编辑
-                            </Button>
-                          )}
-                          {canDelete && !protectedRole && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              disabled={blockedByReferences || deleteMutation.isPending}
-                              aria-label={`删除角色 ${role.role}`}
-                              onClick={() => setDeleteTarget({ id: role.id, name: role.role })}
-                            >
-                              <Trash2 />
-                            </Button>
-                          )}
-                        </div>
-                        {assignedMembers > 0 && (
-                          <p className="text-muted-foreground mt-1 text-xs">
-                            先为这些成员调整角色后才能删除。
-                          </p>
-                        )}
-                        {canViewInvitations && pendingInvitations > 0 && (
-                          <p className="text-muted-foreground mt-1 text-xs">
-                            先取消引用此角色的待处理邀请。
-                          </p>
-                        )}
-                        {!canViewInvitations && canDelete && (
-                          <p className="text-muted-foreground mt-1 text-xs">
-                            待处理邀请引用由服务器在删除时检查。
-                          </p>
-                        )}
-                      </TableCell>
+          <Show
+            when={!rolesQuery.isPending}
+            fallback={<p class="text-muted-foreground text-sm">正在读取角色…</p>}
+          >
+            <Show
+              when={!rolesQuery.isError}
+              fallback={
+                <Alert variant="destructive">
+                  <AlertTitle>无法读取角色</AlertTitle>
+                  <AlertDescription>{rolesQuery.error?.message}</AlertDescription>
+                </Alert>
+              }
+            >
+              <Show
+                when={(rolesQuery.data?.length ?? 0) > 0}
+                fallback={
+                  <p class="text-muted-foreground py-8 text-center text-sm">尚未创建自定义角色</p>
+                }
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>角色</TableHead>
+                      <TableHead>权限</TableHead>
+                      <TableHead>成员</TableHead>
+                      <TableHead>待处理邀请</TableHead>
+                      <TableHead class="w-40">操作</TableHead>
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    <For each={rolesQuery.data ?? []}>
+                      {(role) => {
+                        const permission = () => normalizePermission(role.permission);
+                        const assignedMembers = () => memberCount(role.role);
+                        const pendingInvitations = () => invitationCount(role.role);
+                        const grantable = () => withinGrantBoundary(permission(), orgCtx.access);
+                        const adminEquivalent = () => hasAdminPermissions(permission());
+                        const protectedRole = () => adminEquivalent() && !orgCtx.access.isOwner;
+                        const blockedByReferences = () =>
+                          assignedMembers() > 0 ||
+                          (canViewInvitations() && pendingInvitations() > 0);
+
+                        return (
+                          <TableRow>
+                            <TableCell class="font-medium">{role.role}</TableCell>
+                            <TableCell>
+                              <PermissionBadges permission={permission()} />
+                            </TableCell>
+                            <TableCell>{assignedMembers()}</TableCell>
+                            <TableCell>
+                              {canViewInvitations() ? pendingInvitations() : "受限"}
+                            </TableCell>
+                            <TableCell>
+                              <div class="flex gap-2">
+                                <Show when={canUpdate() && grantable() && !protectedRole()}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      openDraft({
+                                        id: role.id,
+                                        name: role.role,
+                                        permission: permission(),
+                                      })
+                                    }
+                                  >
+                                    编辑
+                                  </Button>
+                                </Show>
+                                <Show when={canDelete() && !protectedRole()}>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    disabled={blockedByReferences() || deleteMutation.isPending}
+                                    aria-label={`删除角色 ${role.role}`}
+                                    onClick={() =>
+                                      setDeleteTarget({ id: role.id, name: role.role })
+                                    }
+                                  >
+                                    ×
+                                  </Button>
+                                </Show>
+                              </div>
+                              <Show when={assignedMembers() > 0}>
+                                <p class="text-muted-foreground mt-1 text-xs">
+                                  先为这些成员调整角色后才能删除。
+                                </p>
+                              </Show>
+                              <Show when={canViewInvitations() && pendingInvitations() > 0}>
+                                <p class="text-muted-foreground mt-1 text-xs">
+                                  先取消引用此角色的待处理邀请。
+                                </p>
+                              </Show>
+                              <Show when={!canViewInvitations() && canDelete()}>
+                                <p class="text-muted-foreground mt-1 text-xs">
+                                  待处理邀请引用由服务器在删除时检查。
+                                </p>
+                              </Show>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }}
+                    </For>
+                  </TableBody>
+                </Table>
+              </Show>
+            </Show>
+          </Show>
         </CardContent>
       </Card>
 
       <RoleEditorDialog
-        key={draft ? `${draft.id ?? "new"}:${draft.name}` : "closed"}
-        open={draft !== null}
+        open={draft() !== null}
         onOpenChange={(open) => !open && setDraft(null)}
-        initialDraft={draft}
+        initialDraft={draft()}
         catalog={permissionCatalog}
-        access={access}
-        affectedMemberCount={draft?.id ? memberCount(draft.name) : 0}
+        access={orgCtx.access}
+        affectedMemberCount={draft()?.id ? memberCount(draft()!.name) : 0}
         isSaving={saveMutation.isPending}
-        onSave={(value) => saveMutation.mutate(value)}
+        onSave={(value) => void saveMutation.mutate(value)}
       />
 
       <AlertDialog
-        open={deleteTarget !== null}
+        open={deleteTarget() !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>删除自定义角色“{deleteTarget?.name}”？</AlertDialogTitle>
+            <AlertDialogTitle>删除自定义角色“{deleteTarget()?.name}”？</AlertDialogTitle>
             <AlertDialogDescription>
               有成员或待处理邀请引用时，服务端会拒绝删除。请先调整成员角色或处理邀请。
             </AlertDialogDescription>
@@ -337,8 +343,11 @@ function OrganizationRolesPage() {
             <AlertDialogCancel disabled={deleteMutation.isPending}>取消</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              disabled={!deleteTarget || deleteMutation.isPending}
-              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+              disabled={!deleteTarget() || deleteMutation.isPending}
+              onClick={() => {
+                const target = deleteTarget();
+                if (target) void deleteMutation.mutate(target.id);
+              }}
             >
               {deleteMutation.isPending ? "删除中…" : "确认删除"}
             </AlertDialogAction>
@@ -385,19 +394,19 @@ function hasAdminPermissions(permission: Record<string, string[]>): boolean {
   );
 }
 
-function PermissionBadges({ permission }: { permission: Record<string, string[]> }) {
-  const entries = Object.entries(permission).flatMap(([resource, actions]) =>
-    actions.map((action) => `${resource}.${action}`),
-  );
-  if (entries.length === 0)
-    return <span className="text-muted-foreground text-sm">无额外权限</span>;
+function PermissionBadges(props: { permission: Record<string, string[]> }) {
+  const entries = () =>
+    Object.entries(props.permission).flatMap(([resource, actions]) =>
+      actions.map((action) => `${resource}.${action}`),
+    );
   return (
-    <div className="flex flex-wrap gap-1">
-      {entries.map((entry) => (
-        <Badge key={entry} variant="secondary">
-          {entry}
-        </Badge>
-      ))}
-    </div>
+    <Show
+      when={entries().length > 0}
+      fallback={<span class="text-muted-foreground text-sm">无额外权限</span>}
+    >
+      <div class="flex flex-wrap gap-1">
+        <For each={entries()}>{(entry) => <Badge variant="secondary">{entry}</Badge>}</For>
+      </div>
+    </Show>
   );
 }

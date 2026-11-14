@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/solid-router";
 
 import { OrgContext } from "@/lib/org-context";
 import {
@@ -40,19 +40,29 @@ export const Route = createFileRoute("/_authenticated/org/$orgSlug")({
 });
 
 function OrganizationContextLayout() {
-  const { access, org, role, user } = Route.useRouteContext();
+  const routeCtx = Route.useRouteContext();
 
   return (
-    <OrgContext.Provider
+    <OrgContext
       value={{
-        userId: user.id,
-        org,
-        role,
-        isOwner: access.isOwner,
-        access,
+        get userId() {
+          return routeCtx().user.id;
+        },
+        get org() {
+          return routeCtx().org;
+        },
+        get role() {
+          return routeCtx().role;
+        },
+        get isOwner() {
+          return routeCtx().access.isOwner;
+        },
+        get access() {
+          return routeCtx().access;
+        },
       }}
     >
       <Outlet />
-    </OrgContext.Provider>
+    </OrgContext>
   );
 }

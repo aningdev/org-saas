@@ -1,11 +1,11 @@
-import { Button } from "@org-saas/ui/components/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@org-saas/ui/components/card";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Building2, Plus } from "lucide-react";
+import { useQuery } from "@tanstack/solid-query";
+import { createFileRoute, useNavigate } from "@tanstack/solid-router";
+import { For, Show } from "solid-js";
 
 import { UserAvatar } from "@/components/user-avatar";
 import { orgListQueryOptions } from "@/lib/query-options";
+import { Button } from "@/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/ui/card";
 
 export const Route = createFileRoute("/_authenticated/me/organizations/")({
   loader: ({ context }) =>
@@ -15,59 +15,93 @@ export const Route = createFileRoute("/_authenticated/me/organizations/")({
 
 function DashboardIndex() {
   const navigate = useNavigate();
-  const { user } = Route.useRouteContext();
-  const { data: orgs } = useSuspenseQuery(orgListQueryOptions(user.id));
+  const routeCtx = Route.useRouteContext();
+  const orgsQuery = useQuery(() => orgListQueryOptions(routeCtx().user.id));
+  const orgs = () => orgsQuery.data ?? [];
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div class="p-6">
+      <div class="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">我的组织</h1>
-          <p className="text-muted-foreground text-sm">管理你已加入的组织和个人设置</p>
+          <h1 class="text-2xl font-bold">我的组织</h1>
+          <p class="text-muted-foreground text-sm">管理你已加入的组织和个人设置</p>
         </div>
         <Button onClick={() => navigate({ to: "/me/organizations/new" })}>
-          <Plus className="size-4" />
+          <PlusIcon class="size-4" />
           创建组织
         </Button>
       </div>
 
-      <h2 className="mb-4 text-lg font-semibold">我的组织</h2>
+      <h2 class="mb-4 text-lg font-semibold">我的组织</h2>
 
-      {orgs.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-12">
-          <Building2 className="text-muted-foreground mb-4 size-12" />
-          <CardHeader className="items-center p-0">
-            <CardTitle className="text-lg">还没有加入任何组织</CardTitle>
-            <CardDescription>创建一个新组织或等待邀请加入</CardDescription>
-          </CardHeader>
-        </Card>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {orgs.map(
-            (org: {
-              id: string;
-              name: string;
-              slug: string;
-              logo?: string | null;
-              createdAt: Date;
-            }) => (
+      <Show
+        when={orgs().length > 0}
+        fallback={
+          <Card class="flex flex-col items-center justify-center py-12">
+            <BuildingIcon class="text-muted-foreground mb-4 size-12" />
+            <CardHeader class="items-center p-0">
+              <CardTitle class="text-lg">还没有加入任何组织</CardTitle>
+              <CardDescription>创建一个新组织或等待邀请加入</CardDescription>
+            </CardHeader>
+          </Card>
+        }
+      >
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <For each={orgs()}>
+            {(org) => (
               <Card
-                key={org.id}
-                className="hover:bg-accent/50 cursor-pointer transition-colors"
+                class="hover:bg-accent/50 cursor-pointer transition-colors"
                 onClick={() => navigate({ to: `/org/${org.slug}` as string })}
               >
-                <CardHeader className="flex-row items-center gap-3">
+                <CardHeader class="flex-row items-center gap-3">
                   <UserAvatar name={org.name} image={org.logo} size="lg" />
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="truncate text-base">{org.name}</CardTitle>
-                    <CardDescription className="text-xs">/{org.slug}</CardDescription>
+                  <div class="min-w-0 flex-1">
+                    <CardTitle class="truncate text-base">{org.name}</CardTitle>
+                    <CardDescription class="text-xs">/{org.slug}</CardDescription>
                   </div>
                 </CardHeader>
               </Card>
-            ),
-          )}
+            )}
+          </For>
         </div>
-      )}
+      </Show>
     </div>
+  );
+}
+
+function PlusIcon(props: { class?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={props.class}
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  );
+}
+
+function BuildingIcon(props: { class?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={props.class}
+    >
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+    </svg>
   );
 }
