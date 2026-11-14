@@ -1,5 +1,5 @@
 {
-  "extends": "@org-saas/config/tsconfig.package.json",
+  "extends": "../../tsconfig.package.json",
   "compilerOptions": {
     "types": [],
     "rootDir": "./src",

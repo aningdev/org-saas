@@ -20,7 +20,7 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 - `apps/fumadocs`：独立文档应用，使用 Fumadocs（React）。
 - `apps/mini`：微信小程序，使用 TDesign、WXML 和 WXSS。
 - `packages/api`、`auth`、`db`：共享业务 API、认证、数据访问。
-- `packages/env`：环境变量校验；`packages/config`：共享 TypeScript 配置。
+- `packages/env`：环境变量校验。共享 TypeScript 配置在根目录 `tsconfig.base.json` / `tsconfig.package.json`。
 
 本文件适用于整个仓库。子目录文件补充局部约定。
 

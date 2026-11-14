@@ -8,7 +8,6 @@
         "@org-saas/env": "workspace:*",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "vite": "catalog:",
         "vite-plus": "catalog:",
       },
@@ -73,7 +72,6 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "@solidjs/babel-plugin": "catalog:",
         "@solidjs/vite-plugin": "catalog:",
         "@tailwindcss/vite": "catalog:",
@@ -103,7 +101,6 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "@types/node": "catalog:",
         "typescript": "catalog:",
       },
@@ -119,13 +116,8 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "typescript": "catalog:",
       },
-    },
-    "packages/config": {
-      "name": "@org-saas/config",
-      "version": "0.0.0",
     },
     "packages/db": {
       "name": "@org-saas/db",
@@ -137,7 +129,6 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "@types/pg": "^8.23.1",
         "drizzle-kit": "^1.0.0-rc.5",
         "typescript": "catalog:",
@@ -152,7 +143,6 @@
         "zod": "catalog:",
       },
       "devDependencies": {
-        "@org-saas/config": "workspace:*",
         "@types/node": "catalog:",
         "typescript": "catalog:",
       },
@@ -163,7 +153,6 @@
         "@better-auth/core": "catalog:",
         "@org-saas/api": "workspace:*",
         "@org-saas/auth": "workspace:*",
-        "@org-saas/config": "workspace:*",
         "@org-saas/db": "workspace:*",
         "@orpc/client": "catalog:",
         "@orpc/openapi": "catalog:",
@@ -397,8 +386,6 @@
     "@org-saas/api": ["@org-saas/api@workspace:packages/api"],
 
     "@org-saas/auth": ["@org-saas/auth@workspace:packages/auth"],
-
-    "@org-saas/config": ["@org-saas/config@workspace:packages/config"],
 
     "@org-saas/db": ["@org-saas/db@workspace:packages/db"],
 

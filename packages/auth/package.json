@@ -24,7 +24,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@org-saas/config": "workspace:*",
     "typescript": "catalog:"
   }
 }

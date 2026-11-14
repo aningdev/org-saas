@@ -9,7 +9,6 @@
     "@better-auth/core": "catalog:",
     "@org-saas/api": "workspace:*",
     "@org-saas/auth": "workspace:*",
-    "@org-saas/config": "workspace:*",
     "@org-saas/db": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",

@@ -25,8 +25,9 @@ org-saas/
 │   ├── api/                 # 业务契约、处理器与认证中间件
 │   ├── auth/                # Better Auth 配置、权限词表与会话入口
 │   ├── db/                  # Drizzle 模型、关系与数据库连接
-│   ├── env/                 # 服务端、Web 与移动端环境校验
-│   └── config/              # 共享 TypeScript 配置
+│   └── env/                 # 服务端、Web 与移动端环境校验
+├── tsconfig.base.json       # 共享 TypeScript 基础配置
+├── tsconfig.package.json    # 共享包编译配置（extends base）
 └── docs/
     ├── architecture/        # 架构专题与领域词汇
     ├── adr/                 # 设计决策及原因
