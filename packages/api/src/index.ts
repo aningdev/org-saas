@@ -21,10 +21,8 @@ const logger = pino({
 export const standardLimiter = new MemoryRateLimiter({
   maxRequests: 100,
   window: 60000,
-  blockingUntilReady: {
-    enabled: true,
-    timeout: 5000, // Wait up to 5 seconds
-  },
+  // Wait up to 5 seconds for capacity instead of rejecting immediately.
+  timeout: 5000,
 });
 
 // Extend the context with the request logger and rate limiter.
