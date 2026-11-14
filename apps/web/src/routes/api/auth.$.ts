@@ -1,5 +1,5 @@
 import { auth } from "@org-saas/auth";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/solid-router";
 
 async function handle({ request }: { request: Request }): Promise<Response> {
   return auth.handler(request);

@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/solid-router";
 
 import { getSession } from "@/functions/auth.fn";
 import { getSafeReturnTarget } from "@/utils/return-target";

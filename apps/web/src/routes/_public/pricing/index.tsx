@@ -1,14 +1,9 @@
-import { Badge } from "@org-saas/ui/components/badge";
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@org-saas/ui/components/card";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/solid-router";
+import { For } from "solid-js";
+
+import { Badge } from "@/ui/badge";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
 
 export const Route = createFileRoute("/_public/pricing/")({
   head: () => ({
@@ -54,45 +49,66 @@ const capabilities = [
   },
 ];
 
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class="text-primary mt-0.5 size-4 shrink-0"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
 function PricingPage() {
   return (
-    <section className="container mx-auto px-4 py-20">
-      <div className="mx-auto max-w-5xl">
-        <header className="mx-auto mb-12 max-w-2xl text-center">
-          <Badge variant="secondary" className="mb-4">
+    <section class="container mx-auto px-4 py-20">
+      <div class="mx-auto max-w-5xl">
+        <header class="mx-auto mb-12 max-w-2xl text-center">
+          <Badge variant="secondary" class="mb-4">
             Pricing status
           </Badge>
-          <h1 className="mb-4 text-4xl font-bold md:text-5xl">Pricing and plans are not set yet</h1>
-          <p className="text-muted-foreground text-lg">
+          <h1 class="mb-4 text-4xl font-bold md:text-5xl">Pricing and plans are not set yet</h1>
+          <p class="text-muted-foreground text-lg">
             Explore the organization tools available today. Prices and plan limits have not been
             set.
           </p>
         </header>
 
-        <div className="grid gap-6 md:grid-cols-3">
-          {capabilities.map(({ title, description, details }) => (
-            <Card key={title} className="h-full">
-              <CardHeader>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="flex flex-col gap-3 text-sm">
-                  {details.map((detail) => (
-                    <li key={detail} className="flex items-start gap-2">
-                      <Check aria-hidden="true" className="text-primary mt-0.5 size-4 shrink-0" />
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-          ))}
+        <div class="grid gap-6 md:grid-cols-3">
+          <For each={capabilities}>
+            {(capability) => (
+              <Card class="h-full">
+                <CardHeader>
+                  <CardTitle>{capability.title}</CardTitle>
+                  <CardDescription>{capability.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul class="flex flex-col gap-3 text-sm">
+                    <For each={capability.details}>
+                      {(detail) => (
+                        <li class="flex items-start gap-2">
+                          <CheckIcon />
+                          <span>{detail}</span>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+          </For>
         </div>
 
-        <div className="bg-muted/30 mt-12 rounded-xl border p-8 text-center">
-          <h2 className="mb-3 text-2xl font-semibold">Explore Org SaaS</h2>
-          <p className="text-muted-foreground mx-auto mb-6 max-w-2xl">
+        <div class="bg-muted/30 mt-12 rounded-xl border p-8 text-center">
+          <h2 class="mb-3 text-2xl font-semibold">Explore Org SaaS</h2>
+          <p class="text-muted-foreground mx-auto mb-6 max-w-2xl">
             Prices, usage limits, billing terms, and support commitments have not been set. Create
             an account to explore the organization workspace.
           </p>

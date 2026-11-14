@@ -8,7 +8,7 @@ import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferenceHandlerPlugin } from "@orpc/openapi/plugins";
 import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/solid-router";
 
 const rpcHandler = new RPCHandler(appRouter, {
   plugins: createHTTPPlugins<EnhancedContext>({ origin: env.CORS_ORIGIN, logger, protocol: "rpc" }),
