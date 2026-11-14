@@ -1,23 +1,18 @@
 import tailwindcss from "@tailwindcss/vite";
-import { devtools } from "@tanstack/devtools-vite";
-import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import viteReact from "@vitejs/plugin-react";
-import { defineConfig, lazyPlugins } from "vite-plus";
+import { tanstackStart } from "@tanstack/solid-start/plugin/vite";
+import solidPlugin from "@solidjs/vite-plugin";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   resolve: {
     tsconfigPaths: true,
+    alias: {
+      "solid-js/web": "@solidjs/web",
+      "solid-js/web/storage": "@solidjs/web/storage",
+    },
   },
-  plugins: lazyPlugins(() => [
-    devtools(),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact({ compiler: true }),
-  ]),
+  plugins: [tailwindcss(), tanstackStart(), solidPlugin({ ssr: true })],
   server: {
     port: 3001,
-    warmup: {
-      clientFiles: ["./src/routes/**/*.tsx"],
-    },
   },
 });
