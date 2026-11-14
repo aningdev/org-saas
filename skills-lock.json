@@ -1,6 +1,12 @@
 {
   "version": 2,
   "skills": {
+    "advisor": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/agents/advisor/SKILL.md",
+      "computedHash": "4cb2516e3d9c4de5ae14bb4cee2d09e063817eac2b128c8c70c477d0bded086d"
+    },
     "better-auth-best-practices": {
       "source": "better-auth/skills",
       "sourceType": "github",
@@ -12,6 +18,60 @@
       "sourceType": "github",
       "skillPath": "security/SKILL.md",
       "computedHash": "36e9710eaa13c61c00bec00a4902fdc6ed829e6de13127238ae57494e93c1d9d"
+    },
+    "code-architect": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/agents/code-architect/SKILL.md",
+      "computedHash": "87170a74fc2e7b5f93d0e5c07d30a37634b0c52d490c660374ca5e6ebc240932"
+    },
+    "code-feature-definer": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/agents/code-feature-definer/SKILL.md",
+      "computedHash": "67cd987e4e710d61bf53ae505c9e84164f4948ba52532ed4ff352e248b4b8c4d"
+    },
+    "codebase-design": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-design/SKILL.md",
+      "computedHash": "cbf3ac797eb735af5aa91db6df690fb891c9c15026923b377cfa77036ef4151e"
+    },
+    "codebase-docs": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-docs/SKILL.md",
+      "computedHash": "283896fedc2e0edc60cc6d4b678dfc13ef609a477c2c8cc251b5f7c1ae290be4"
+    },
+    "codebase-git": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-git/SKILL.md",
+      "computedHash": "80ff54a30874d17e1d244327ed3f46af4c0e8678065636f8cb179a39815ee928"
+    },
+    "codebase-lang": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-lang/SKILL.md",
+      "computedHash": "ca11875e2cf873a93a19c620e3514ebe921d90244b392a660a041a91598175b7"
+    },
+    "codebase-review": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-review/SKILL.md",
+      "computedHash": "a8b32291a399ec45bd999f6ae3aa827b5e03ca1c4353bfaef7185f612ea8036a"
+    },
+    "codebase-setup": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-setup/SKILL.md",
+      "computedHash": "7da1c34e6661f53fd1f75c31f0562b05518c994923b5cf83dc2876e7cfef0286"
+    },
+    "codebase-verify": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/code/codebase-verify/SKILL.md",
+      "computedHash": "cb1760727e7af00681e2d40adaf07db99b6e5f54c28ea64455ca6db3ad43cfa5"
     },
     "create-auth": {
       "source": "better-auth/skills",
@@ -25,6 +85,12 @@
       "skillPath": "better-auth/emailAndPassword/SKILL.md",
       "computedHash": "407c1244202876daa748818ed41dc55afde1b3f7aec48ae3a1f1c8a7ee40465e"
     },
+    "grilling": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/base/grilling/SKILL.md",
+      "computedHash": "a88da81b774b0ae3b7d729231e296da0e404f8af1db1efb5d5cbb8d1ebabd19c"
+    },
     "migrate-radix-to-base": {
       "source": "shadcn/ui",
       "sourceType": "github",
@@ -36,6 +102,12 @@
       "sourceType": "github",
       "skillPath": "better-auth/organization/SKILL.md",
       "computedHash": "e5b1238c3b62c789918fe397ed52787742e50944343de33f459629f29b0fe922"
+    },
+    "self-grilling": {
+      "source": "aningdev/skills",
+      "sourceType": "github",
+      "skillPath": "skills/base/self-grilling/SKILL.md",
+      "computedHash": "54a7c13a6c0cb3338eae372a10ced31c39e7250c9a1495ec57c9c0a1968c585c"
     },
     "shadcn": {
       "source": "shadcn/ui",
