@@ -67,9 +67,17 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 
 命令从仓库根执行；完整脚本以根及目标包 `package.json` 为准。
 
-- 主站开发：`vp run dev:web`；文档开发：`vp run dev:fumadocs`。
-- 修改代码后运行 `vpr check`，检查并自动修复。
+- 主站开发：`bun run dev:web`；文档开发：`bun run dev:fumadocs`。
+- `bun run check`：格式、lint、类型检查（只读，不改写）。
+- `bun run fix`：自动修复格式与 lint。
+- `bun run test`：根 `tests/` 下的服务端／工具行为测试（`vp test`）。
 - 自动化测试仅验证明确业务风险或复现已知缺陷，不按单元、接口等类型补齐测试，不为覆盖率或数量凑用例。所有测试及辅助文件集中在根 `tests/`；新增、修改、迁移或删除测试以及调整测试配置前，必读 [测试规范](docs/agents/testing.md)。
 
 - 涉及构建、SSR 或生成流程的改动，运行目标应用的构建或对应生成检查；数据库操作遵循 DB 文件的确认边界。
 - 交付说明实际改动、已执行检查及未完成项。检查失败时区分本次引入的问题与既有问题，不将未执行的检查报告为通过。
+
+## Where to read
+
+- 领域词汇：[docs/GLOSSARY.md](docs/GLOSSARY.md)（指向 `docs/architecture/GLOSSARY.md`）
+- 架构约定：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)（指向 `docs/architecture/`）
+- 决策记录：[docs/adr/](docs/adr/)

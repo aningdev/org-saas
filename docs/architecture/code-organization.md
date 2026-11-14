@@ -7,15 +7,15 @@
 ```text
 org-saas/
 ├── apps/
-│   ├── web/                 # TanStack Start 主业务应用
-│   ├── fumadocs/            # 独立文档应用
+│   ├── web/                 # TanStack Start · Solid 2 主业务应用
+│   ├── fumadocs/            # 独立文档应用（React / Fumadocs）
 │   └── mini/                # 微信小程序
 ├── packages/
 │   ├── api/                 # 业务契约、处理器与认证中间件
 │   ├── auth/                # Better Auth 配置、权限词表与会话入口
 │   ├── db/                  # Drizzle 模型、关系与数据库连接
 │   ├── env/                 # 服务端、Web 与移动端环境校验
-│   ├── ui/                  # Web 共享组件、主题与样式
+│   ├── ui/                  # 遗留 React/shadcn 组件库（主站不再依赖）
 │   └── config/              # 共享 TypeScript 配置
 └── docs/
     ├── architecture/        # 架构专题与领域词汇
@@ -23,17 +23,17 @@ org-saas/
     └── implementation/      # 实施计划与验收
 ```
 
-| 模块     | 职责                                          | 主要入口                                      |
-| -------- | --------------------------------------------- | --------------------------------------------- |
-| Web      | 公开页面、认证、个人中心、组织业务、HTTP 接入 | [Web 约定](../../apps/web/AGENTS.md)          |
-| Fumadocs | 文档内容、路由及搜索                          | [文档应用约定](../../apps/fumadocs/AGENTS.md) |
-| Mini     | 小程序页面、组件和未来接口接入                | [小程序约定](../../apps/mini/AGENTS.md)       |
-| API      | Zod/oRPC 契约、自定义业务、共享访问检查       | [API 约定](../../packages/api/AGENTS.md)      |
-| Auth     | 插件配置、权限定义、请求级 Session 读取       | [Auth 约定](../../packages/auth/AGENTS.md)    |
-| DB       | 模型、关系、查询和事务                        | [DB 约定](../../packages/db/AGENTS.md)        |
-| UI       | shadcn / Base UI 组件及 Web 主题              | [UI 约定](../../packages/ui/AGENTS.md)        |
+| 模块       | 职责                                              | 主要入口                                      |
+| ---------- | ------------------------------------------------- | --------------------------------------------- |
+| Web        | 公开页面、认证、个人中心、组织业务、HTTP 接入     | [Web 约定](../../apps/web/AGENTS.md)          |
+| Fumadocs   | 文档内容、路由及搜索                              | [文档应用约定](../../apps/fumadocs/AGENTS.md) |
+| Mini       | 小程序页面、组件和未来接口接入                    | [小程序约定](../../apps/mini/AGENTS.md)       |
+| API        | Zod/oRPC 契约、自定义业务、共享访问检查           | [API 约定](../../packages/api/AGENTS.md)      |
+| Auth       | 插件配置、权限定义、请求级 Session 读取           | [Auth 约定](../../packages/auth/AGENTS.md)    |
+| DB         | 模型、关系、查询和事务                            | [DB 约定](../../packages/db/AGENTS.md)        |
+| UI（遗留） | React / shadcn 组件库；仅维护该包或文档站相关场景 | [遗留 UI 约定](../../packages/ui/AGENTS.md)   |
 
-微信小程序使用自身的 WXML、WXSS 和 TDesign，不直接复用 React UI。多端共享业务接口，而不是共享所有界面实现。
+微信小程序使用自身的 WXML、WXSS 和 TDesign，不复用 Web UI。主站 UI 使用 `@ui-sdk/solid`，封装在 `apps/web/src/ui/`。多端共享业务接口，而不是共享所有界面实现。
 
 ## 依赖方向与公开接口
 
@@ -49,7 +49,7 @@ flowchart TB
     Auth --> Env["packages/env 服务端入口"]
     DB --> Env
     WebClient["apps/web 浏览器"] --> Contract["API 契约与可共享 schema"]
-    WebClient --> UI["packages/ui"]
+    WebClient --> WebUI["apps/web/src/ui<br/>@ui-sdk/solid"]
     WebClient --> AuthClient["Better Auth 客户端"]
 ```
 
@@ -62,8 +62,9 @@ API 契约与实现分开：`src/contracts/` 定义输入、输出与预期错�
 ```text
 apps/web/src/
 ├── components/              # 跨页面业务组件与 fallback
-├── hooks/                   # 可复用 React hooks
+├── hooks/                   # 可复用 Solid 组合逻辑
 ├── lib/                     # auth-client、组织上下文、查询配置
+├── ui/                      # ui-sdk 的 Tailwind 样式封装
 ├── functions/               # Web 所需的 Server Functions
 ├── middleware/              # TanStack Start 服务端中间件
 ├── utils/                   # guards、errors、同构 oRPC 客户端
@@ -74,7 +75,7 @@ apps/web/src/
 
 业务实现需要同时服务 Web、小程序和 App 时，放共享 API；仅用于 Web 会话、守卫或页面适配的服务端能力放 `functions/`。HTTP 路由接入协议并调用对应包，不在入口积累业务处理。
 
-路由私有组件放同级 `-components/`，跨页面业务组件放 `components/`；通用视觉组件放共享 UI。目录形式、命名和编码规则以 [Web 约定](../../apps/web/AGENTS.md)及 UI 约定为准。
+路由私有组件放同级 `-components/`，跨页面业务组件放 `components/`；通用视觉组件放 `src/ui/`（基于 ui-sdk）。目录形式、命名和编码规则以 [Web 约定](../../apps/web/AGENTS.md)为准。
 
 ### 当前路由分区
 
@@ -188,7 +189,8 @@ members/
 | Web 页面、布局、导航和用户反馈                             | Web 路由与业务组件                 |
 | Web 会话读取、页面守卫所需服务端适配                       | Web Server Functions 与 middleware |
 | 跨页面业务组件                                             | Web `components/`                  |
-| 通用视觉组件或主题                                         | 共享 UI                            |
+| 主站通用视觉组件或主题                                     | Web `src/ui/`（ui-sdk）            |
+| 遗留 React 组件库维护                                      | `packages/ui`（非主站路径）        |
 | 模型、关系、索引和事务支持                                 | DB，遵循生成及应用流程             |
 
 分包目的是集中职责与变化原因，不为每个功能增加转发层或独立服务。实际依赖、公开接口及客户端／服务端边界发生变化时，同步更新本文件。

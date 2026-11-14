@@ -2,6 +2,7 @@
   "name": "@org-saas/ui",
   "version": "0.0.0",
   "private": true,
+  "description": "Legacy React/shadcn UI. apps/web uses @ui-sdk/solid instead; do not import from here for new web features.",
   "type": "module",
   "exports": {
     "./globals.css": "./src/styles/globals.css",

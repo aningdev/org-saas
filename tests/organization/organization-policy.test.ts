@@ -612,12 +612,13 @@ describe("organization policy plugin endpoint coverage", () => {
       headers: ordinaryMember.headers,
     });
     expect(memberOrganization?.invitations).toEqual([]);
-    expect(
-      await auth.api.listInvitations({
+    // Better Auth fail-closes listInvitations for roles without invitation:read.
+    await expect(
+      auth.api.listInvitations({
         query: { organizationId },
         headers: ordinaryMember.headers,
       }),
-    ).toEqual([]);
+    ).rejects.toThrow("You are not allowed to list invitations for this organization");
     expect(
       await auth.api.listInvitations({ query: { organizationId }, headers: owner.headers }),
     ).toHaveLength(1);
@@ -650,8 +651,7 @@ describe("organization policy plugin endpoint coverage", () => {
         { headers: { cookie: ordinaryMember.headers.get("cookie") ?? "" } },
       ),
     );
-    expect(httpInvitationsResponse.ok).toBe(true);
-    await expect(httpInvitationsResponse.json()).resolves.toEqual([]);
+    expect(httpInvitationsResponse.ok).toBe(false);
   });
 
   it("rejects accepting an invitation after its sender leaves the organization", async () => {

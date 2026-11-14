@@ -1,8 +1,10 @@
-# UI 包约定
+# UI 包约定（遗留）
+
+**状态：遗留。** 主站 `apps/web` 已改用 `@ui-sdk/solid`（见 [Web 约定](../../apps/web/AGENTS.md)）。本包仅在维护历史 React/shadcn 组件、或明确需要 React 共享 UI 时使用；不要为新主站功能从此包导入。
 
 ## 职责与入口
 
-共享 Web 组件库，采用 shadcn / Base UI。组件配置见 `components.json`，主题入口见 `src/styles/globals.css`。
+共享 React Web 组件库，采用 shadcn / Base UI。组件配置见 `components.json`，主题入口见 `src/styles/globals.css`。
 
 使用公开子路径导入，包没有根组件聚合导出：
 
@@ -20,11 +22,11 @@ import { cn } from "@org-saas/ui/lib/utils";
 
 ## 样式与图标
 
-- Web 业务 UI 优先组合共享组件；颜色、背景、边框和阴影使用 Tailwind 语义 token，主题值集中在 `src/styles/globals.css` 维护。
+- 颜色、背景、边框和阴影使用 Tailwind 语义 token，主题值集中在 `src/styles/globals.css` 维护。
 - 字号等视觉属性使用 Tailwind 工具类；自定义 CSS class 仅用于结构布局。新增主题 token 时核对明暗主题。
 - 图标统一使用 `lucide-react`，不手写内联 SVG、导入 SVG 图标或添加其他图标库；图片内容不适用图标规则。
 - 图片使用语义适合的组件，如头像使用 `Avatar`；原生图片元素提供 `alt`。
 
 ## 验证
 
-修改共享组件时检查公开 props、相关使用方和键盘交互；基础组件或主题变更同时检查明暗主题及实际消费页面。
+修改本包时检查公开 props、相关使用方和键盘交互；基础组件或主题变更同时检查明暗主题。主站新页面不要以本包为依赖。

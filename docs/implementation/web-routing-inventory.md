@@ -75,7 +75,7 @@ Router 在 `src/router.tsx` 开启 scroll restoration、intent preload，预加�
 
 ## 路由生成器与迁移前置
 
-仓库 catalog 锁定 `@tanstack/react-router` `^1.170.41`、`@tanstack/router-plugin` `^1.168.42`、`@tanstack/react-start` `^1.168.60`；实际安装解析版本及 vite 插件配置应在实施阶段复核。生成树已证实无路径 layout、括号目录、动态段、splat 与 index 路由的上述命名结果。迁移后依赖新生成树检查 route ID，不能把内部 ID 变动误判为 URL 变更。
+主站已迁至 Solid：catalog 使用 `@tanstack/solid-router` / `@tanstack/solid-start` 的 2.0 RC，以及 `@solidjs/vite-plugin`。文档站仍使用 React 版 TanStack。生成树已证实无路径 layout、括号目录、动态段、splat 与 index 路由的上述命名结果。迁移后依赖新生成树检查 route ID，不能把内部 ID 变动误判为 URL 变更。
 
 权限依赖按 [permissions.md](permissions.md) 执行：平台 Admin、动态角色策略、组织状态字段/API、归档/恢复及服务端访问限制尚属待实施计划。组织外层、`_active` 与 archived 分支依赖服务端组织状态及授权结果；Admin/roles 页面须等权限能力具备后接入，不在本票推定其可用。API handler 保持协议独立。
 
