@@ -111,7 +111,7 @@ flowchart LR
 
 页面守卫按页面所需操作权限判断，菜单及按钮消费同一权限语义；owner 身份规则单独判断。页面和 UI 只提供访问体验，服务端是最终授权入口。
 
-静态 `checkRolePermission` 只用于已配置的静态角色，动态角色由服务端权限结果反映。组织、用户与权限缓存的传递方式见 [请求与数据流](request-data-flow.md)。
+静态 `checkRolePermission` 只用于已配置的静态角色 UI；动态角色与服务端允许／拒绝一律走 Better Auth `hasPermission`（`auth.api` / `authClient.organization`）。Web 的 `access-context` DTO 与 `usePermission` 消费同一套 BA 资源名（含 `ac`），不另造别名。组织、用户与权限缓存的传递方式见 [请求与数据流](request-data-flow.md)。
 
 ## 组织生命周期
 

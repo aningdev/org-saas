@@ -8,7 +8,7 @@ export const dashboardRouter = {
   orgStats: protectedImplementer.dashboard.orgStats.handler(async ({ context, input, errors }) => {
     const userId = context.session.user.id;
 
-    const access = await loadOrganizationAccess(input.orgId, userId);
+    const access = await loadOrganizationAccess(input.orgId, userId, context.headers);
     if (access.archivedAt) {
       throw errors.FORBIDDEN({ message: "此组织当前不可访问" });
     }

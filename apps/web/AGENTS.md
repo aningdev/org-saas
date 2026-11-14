@@ -28,7 +28,9 @@
 - 路由专属组件放在同级 `-components/`，避免被识别为路由；跨页面组件放 `src/components/`。组件文件用 kebab-case，导出名用 PascalCase。
 - 保持 SSR / 客户端边界：客户端组件不直接导入数据库、服务端环境变量或认证服务端实现。
 - Server Functions 的认证中间件通过 `@org-saas/auth/session` 创建请求级 session getter；该模块仅在服务端入口使用，getter 不跨请求共享。
-- 页面守卫复用现有 `requireSession`、`requireOrgRole`、`requireAdmin`、`requireOwner`、`requirePlatformAdmin`；组织上下文入口是 `src/routes/_authenticated/org/$orgSlug/route.tsx`，按显式 slug 调用 `client.organization.resolveBySlug`。页面守卫不能替代服务端访问检查。
+- 页面守卫：会话用 `requireSession`，平台用 `requirePlatformAdmin`，组织操作用 `requireOrgOperation`（资源名与 Better Auth 一致，如 `ac` / `member`）。不要用角色名字符串守卫动态角色。
+- 组织突变优先 `authClient.organization.*` / `authClient.admin.*`；权限判定以 Better Auth `hasPermission` 为准。oRPC 仅用于 BA 没有的能力（按 slug 解析、access-context DTO、归档／恢复、审计列表、聚合查询）。
+- 组织上下文入口：`src/routes/_authenticated/org/$orgSlug/route.tsx` 调 `client.organization.resolveBySlug`（服务端会 `setActiveOrganization`，便于官方 client 默认当前组织）。页面守卫不能替代服务端访问检查。
 - `src/routes/api/` 负责 oRPC / Better Auth 的 HTTP 接入，业务处理放对应共享包。
 
 ## 数据交互与表单

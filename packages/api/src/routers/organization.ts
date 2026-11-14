@@ -1,4 +1,6 @@
+import { auth } from "@org-saas/auth";
 import { auditEvents, createAuditRecord } from "@org-saas/auth/audit-records";
+import { organizationHasPermission } from "@org-saas/auth/organization-has-permission";
 import { resolveOrganizationOwner } from "@org-saas/auth/organization-owner";
 import { roles } from "@org-saas/auth/permissions";
 import { hasPlatformAdminRole } from "@org-saas/auth/platform-permissions";
@@ -52,7 +54,19 @@ export const organizationRouter = {
         .limit(1);
       if (!organizationRow) fail("NOT_FOUND", "Organization not found.");
 
-      const access = await loadOrganizationAccess(organizationRow.id, context.session.user.id);
+      const access = await loadOrganizationAccess(
+        organizationRow.id,
+        context.session.user.id,
+        context.headers,
+      );
+      // Better Auth client defaults (omit organizationId) follow active org.
+      // Authorization still uses membership + explicit ids / hasPermission.
+      if (!access.archivedAt) {
+        await auth.api.setActiveOrganization({
+          body: { organizationId: organizationRow.id },
+          headers: context.headers,
+        });
+      }
       return {
         organization: {
           ...organizationRow,
@@ -64,15 +78,31 @@ export const organizationRouter = {
   ),
   accessContext: protectedImplementer.organization.accessContext.handler(
     async ({ context, input }) => {
-      const access = await loadOrganizationAccess(input.organizationId, context.session.user.id);
+      const access = await loadOrganizationAccess(
+        input.organizationId,
+        context.session.user.id,
+        context.headers,
+      );
       return accessContextOutput(access);
     },
   ),
   grantableRoles: protectedImplementer.organization.grantableRoles.handler(
     async ({ context, input }) => {
-      const access = await loadOrganizationAccess(input.organizationId, context.session.user.id);
+      const access = await loadOrganizationAccess(
+        input.organizationId,
+        context.session.user.id,
+        context.headers,
+      );
       const [resource, action] = input.operation.split(".");
-      if (!roleAllows(access.statements, resource ?? "", action ?? "")) {
+      if (
+        !resource ||
+        !action ||
+        !(await organizationHasPermission({
+          headers: context.headers,
+          organizationId: input.organizationId,
+          permissions: { [resource]: [action] },
+        }))
+      ) {
         fail(
           "FORBIDDEN",
           "You are not allowed to assign organization roles.",
@@ -208,7 +238,11 @@ export const organizationRouter = {
   }),
   archivedStatus: protectedImplementer.organization.archivedStatus.handler(
     async ({ context, input }) => {
-      const access = await loadOrganizationAccess(input.organizationId, context.session.user.id);
+      const access = await loadOrganizationAccess(
+        input.organizationId,
+        context.session.user.id,
+        context.headers,
+      );
       if (!access.isOwner)
         fail(
           "FORBIDDEN",
