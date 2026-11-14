@@ -1,44 +1,67 @@
-import { Button } from "@org-saas/ui/components/button";
-import { Input } from "@org-saas/ui/components/input";
-import { Label } from "@org-saas/ui/components/label";
-import { toast } from "@org-saas/ui/components/toast";
-import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/solid-query";
+import { useNavigate } from "@tanstack/solid-router";
+import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/ui/button";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
+import { toast } from "@/ui/toast";
 
-export default function SignUpForm({
-  redirectTo,
-  onSwitchToSignIn,
-}: {
-  redirectTo: string;
-  onSwitchToSignIn: () => void;
-}) {
+const signUpSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+});
+
+type SignUpField = "name" | "email" | "password";
+
+export default function SignUpForm(props: { redirectTo: string; onSwitchToSignIn: () => void }) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate({
-    from: "/",
-  });
+  const navigate = useNavigate({ from: "/" });
 
-  const form = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-      name: "",
-    },
-    onSubmit: async ({ value }) => {
+  const [name, setName] = createSignal("");
+  const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
+  const [errors, setErrors] = createSignal<Partial<Record<SignUpField, string>>>({});
+  const [isSubmitting, setIsSubmitting] = createSignal(false);
+
+  const handleSubmit = async (e: SubmitEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const parsed = signUpSchema.safeParse({
+      name: name(),
+      email: email(),
+      password: password(),
+    });
+    if (!parsed.success) {
+      const fieldErrors: Partial<Record<SignUpField, string>> = {};
+      for (const issue of parsed.error.issues) {
+        const key = issue.path[0];
+        if (key === "name" || key === "email" || key === "password") {
+          fieldErrors[key] ??= issue.message;
+        }
+      }
+      setErrors(fieldErrors);
+      return;
+    }
+
+    setErrors({});
+    setIsSubmitting(true);
+    try {
       await authClient.signUp.email(
         {
-          email: value.email,
-          password: value.password,
-          name: value.name,
+          email: parsed.data.email,
+          password: parsed.data.password,
+          name: parsed.data.name,
         },
         {
           onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["session"] });
             await navigate({
-              to: redirectTo as string,
+              to: props.redirectTo as string,
             });
             toast.add({ title: "注册成功！", type: "success" });
           },
@@ -47,114 +70,63 @@ export default function SignUpForm({
           },
         },
       );
-    },
-    validators: {
-      onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
-        email: z.email("Invalid email address"),
-        password: z.string().min(8, "Password must be at least 8 characters"),
-      }),
-    },
-  });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="mx-auto mt-10 w-full max-w-md p-6">
-      <h1 className="mb-6 text-center text-3xl font-bold">Create Account</h1>
+    <div class="mx-auto mt-10 w-full max-w-md p-6">
+      <h1 class="mb-6 text-center text-3xl font-bold">Create Account</h1>
 
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          void form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <div>
-          <form.Field name="name">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Name</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
+      <form onSubmit={handleSubmit} class="space-y-4">
+        <div class="space-y-2">
+          <Label for="name">Name</Label>
+          <Input
+            id="name"
+            name="name"
+            value={name()}
+            onInput={(e) => setName(e.currentTarget.value)}
+          />
+          <Show when={errors().name}>{(message) => <p class="text-red-500">{message()}</p>}</Show>
         </div>
 
-        <div>
-          <form.Field name="email">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Email</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="email"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
+        <div class="space-y-2">
+          <Label for="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={email()}
+            onInput={(e) => setEmail(e.currentTarget.value)}
+          />
+          <Show when={errors().email}>{(message) => <p class="text-red-500">{message()}</p>}</Show>
         </div>
 
-        <div>
-          <form.Field name="password">
-            {(field) => (
-              <div className="space-y-2">
-                <Label htmlFor={field.name}>Password</Label>
-                <Input
-                  id={field.name}
-                  name={field.name}
-                  type="password"
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                />
-                {field.state.meta.errors.map((error) => (
-                  <p key={error?.message} className="text-red-500">
-                    {error?.message}
-                  </p>
-                ))}
-              </div>
-            )}
-          </form.Field>
+        <div class="space-y-2">
+          <Label for="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            value={password()}
+            onInput={(e) => setPassword(e.currentTarget.value)}
+          />
+          <Show when={errors().password}>
+            {(message) => <p class="text-red-500">{message()}</p>}
+          </Show>
         </div>
 
-        <form.Subscribe>
-          {(state) => (
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!state.canSubmit || state.isSubmitting}
-            >
-              {state.isSubmitting ? "Submitting..." : "Sign Up"}
-            </Button>
-          )}
-        </form.Subscribe>
+        <Button type="submit" class="w-full" disabled={isSubmitting()}>
+          {isSubmitting() ? "Submitting..." : "Sign Up"}
+        </Button>
       </form>
 
-      <div className="mt-4 text-center">
+      <div class="mt-4 text-center">
         <Button
           variant="link"
-          onClick={onSwitchToSignIn}
-          className="text-indigo-600 hover:text-indigo-800"
+          onClick={props.onSwitchToSignIn}
+          class="text-indigo-600 hover:text-indigo-800"
         >
           Already have an account? Sign In
         </Button>

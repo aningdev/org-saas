@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext } from "solid-js";
 
 import type { OrganizationAccess } from "@/lib/query-options";
 
@@ -16,12 +16,8 @@ export interface OrgContextValue {
   access: OrganizationAccess;
 }
 
-export const OrgContext = createContext<OrgContextValue | null>(null);
+export const OrgContext = createContext<OrgContextValue>();
 
 export function useOrgContext(): OrgContextValue {
-  const ctx = useContext(OrgContext);
-  if (!ctx) {
-    throw new Error("useOrgContext 必须在 OrgContext.Provider 内使用");
-  }
-  return ctx;
+  return useContext(OrgContext);
 }

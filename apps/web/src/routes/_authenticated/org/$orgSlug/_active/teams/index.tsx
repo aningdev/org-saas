@@ -1,13 +1,12 @@
-import { Button } from "@org-saas/ui/components/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@org-saas/ui/components/card";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, UsersRound } from "lucide-react";
-import { useState } from "react";
+import { useQuery } from "@tanstack/solid-query";
+import { createFileRoute, Link } from "@tanstack/solid-router";
+import { createSignal, For, Show } from "solid-js";
 
 import { usePermission } from "@/hooks/use-permission";
 import { useOrgContext } from "@/lib/org-context";
 import { organizationFullQueryOptions } from "@/lib/query-options";
+import { Button } from "@/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/ui/card";
 
 import { CreateTeamDialog } from "./-components/create-team-dialog";
 
@@ -21,60 +20,55 @@ export const Route = createFileRoute("/_authenticated/org/$orgSlug/_active/teams
 });
 
 function TeamsPage() {
-  const { org, userId } = useOrgContext();
-  const { orgSlug } = Route.useParams();
+  const orgCtx = useOrgContext();
+  const params = Route.useParams();
   const canCreateTeam = usePermission({ team: ["create"] });
-  const [createOpen, setCreateOpen] = useState(false);
-
-  const { data } = useSuspenseQuery(organizationFullQueryOptions(userId, org.id));
-
-  const teams = data?.teams ?? [];
+  const [createOpen, setCreateOpen] = createSignal(false);
+  const orgQuery = useQuery(() => organizationFullQueryOptions(orgCtx.userId, orgCtx.org.id));
+  const teams = () => orgQuery.data?.teams ?? [];
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div class="p-6">
+      <div class="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">团队管理</h1>
-          <p className="text-muted-foreground text-sm">创建和管理组织内的团队</p>
+          <h1 class="text-2xl font-bold">团队管理</h1>
+          <p class="text-muted-foreground text-sm">创建和管理组织内的团队</p>
         </div>
-        {canCreateTeam && (
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="size-4" />
-            创建团队
-          </Button>
-        )}
+        <Show when={canCreateTeam}>
+          <Button onClick={() => setCreateOpen(true)}>创建团队</Button>
+        </Show>
       </div>
 
-      {teams.length === 0 ? (
-        <Card className="flex flex-col items-center justify-center py-12">
-          <UsersRound className="text-muted-foreground mb-4 size-12" />
-          <CardHeader className="items-center p-0">
-            <CardTitle className="text-lg">还没有团队</CardTitle>
-            <CardDescription>创建第一个团队来组织成员</CardDescription>
-          </CardHeader>
-        </Card>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {teams.map((team) => (
-            <Link
-              key={team.id}
-              to="/org/$orgSlug/teams/$teamId"
-              params={{ orgSlug, teamId: team.id }}
-            >
-              <Card className="hover:bg-accent/50 cursor-pointer transition-colors">
-                <CardHeader>
-                  <div className="flex items-center gap-3">
-                    <UsersRound className="text-muted-foreground size-5" />
-                    <CardTitle className="text-base">{team.name}</CardTitle>
-                  </div>
-                </CardHeader>
-              </Card>
-            </Link>
-          ))}
+      <Show
+        when={teams().length > 0}
+        fallback={
+          <Card class="flex flex-col items-center justify-center py-12">
+            <CardHeader class="items-center p-0">
+              <CardTitle class="text-lg">还没有团队</CardTitle>
+              <CardDescription>创建第一个团队来组织成员</CardDescription>
+            </CardHeader>
+          </Card>
+        }
+      >
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <For each={teams()}>
+            {(team) => (
+              <Link
+                to="/org/$orgSlug/teams/$teamId"
+                params={{ orgSlug: params().orgSlug, teamId: team.id }}
+              >
+                <Card class="hover:bg-accent/50 cursor-pointer transition-colors">
+                  <CardHeader>
+                    <CardTitle class="text-base">{team.name}</CardTitle>
+                  </CardHeader>
+                </Card>
+              </Link>
+            )}
+          </For>
         </div>
-      )}
+      </Show>
 
-      <CreateTeamDialog open={createOpen} onOpenChange={setCreateOpen} orgId={org.id} />
+      <CreateTeamDialog open={createOpen()} onOpenChange={setCreateOpen} orgId={orgCtx.org.id} />
     </div>
   );
 }

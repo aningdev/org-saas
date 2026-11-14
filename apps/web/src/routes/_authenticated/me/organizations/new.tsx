@@ -1,21 +1,23 @@
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@org-saas/ui/components/card";
-import { Input } from "@org-saas/ui/components/input";
-import { Label } from "@org-saas/ui/components/label";
-import { toast } from "@org-saas/ui/components/toast";
-import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/solid-query";
+import { createFileRoute, useNavigate } from "@tanstack/solid-router";
+import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 import { syncOrganizationListCacheAfterChange } from "@/lib/organization-cache";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
+import { toast } from "@/ui/toast";
+
+const schema = z.object({
+  name: z.string().min(2, "组织名称至少 2 个字符"),
+  slug: z
+    .string()
+    .min(2, "Slug 至少 2 个字符")
+    .regex(/^[a-z0-9-]+$/, "Slug 只能包含小写字母、数字和连字符"),
+});
 
 export const Route = createFileRoute("/_authenticated/me/organizations/new")({
   component: NewOrgPage,
@@ -24,17 +26,31 @@ export const Route = createFileRoute("/_authenticated/me/organizations/new")({
 function NewOrgPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user } = Route.useRouteContext();
+  const routeCtx = Route.useRouteContext();
+  const [name, setName] = createSignal("");
+  const [slug, setSlug] = createSignal("");
+  const [errors, setErrors] = createSignal<Record<string, string>>({});
+  const [submitting, setSubmitting] = createSignal(false);
 
-  const form = useForm({
-    defaultValues: {
-      name: "",
-      slug: "",
-    },
-    onSubmit: async ({ value }) => {
+  const onSubmit = async (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const parsed = schema.safeParse({ name: name(), slug: slug() });
+    if (!parsed.success) {
+      const next: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (key && !next[key]) next[key] = issue.message;
+      }
+      setErrors(next);
+      return;
+    }
+    setErrors({});
+    setSubmitting(true);
+    try {
       const result = await authClient.organization.create({
-        name: value.name,
-        slug: value.slug,
+        name: parsed.data.name,
+        slug: parsed.data.slug,
       });
 
       if (result.error) {
@@ -43,23 +59,16 @@ function NewOrgPage() {
       }
 
       toast.add({ title: "组织创建成功", type: "success" });
-      await syncOrganizationListCacheAfterChange(queryClient, user.id);
-      void navigate({ to: `/org/${value.slug}` as string });
-    },
-    validators: {
-      onSubmit: z.object({
-        name: z.string().min(2, "组织名称至少 2 个字符"),
-        slug: z
-          .string()
-          .min(2, "Slug 至少 2 个字符")
-          .regex(/^[a-z0-9-]+$/, "Slug 只能包含小写字母、数字和连字符"),
-      }),
-    },
-  });
+      await syncOrganizationListCacheAfterChange(queryClient, routeCtx().user.id);
+      void navigate({ to: `/org/${parsed.data.slug}` as string });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-lg p-6">
-      <h1 className="mb-6 text-2xl font-bold">创建新组织</h1>
+    <div class="mx-auto max-w-lg p-6">
+      <h1 class="mb-6 text-2xl font-bold">创建新组织</h1>
 
       <Card>
         <CardHeader>
@@ -67,75 +76,50 @@ function NewOrgPage() {
           <CardDescription>创建一个新的组织来管理你的团队</CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void form.handleSubmit();
-            }}
-            className="space-y-4"
-          >
-            <form.Field name="name">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>组织名称</Label>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    placeholder="我的组织"
-                    onBlur={field.handleBlur}
-                    onChange={(e) => {
-                      field.handleChange(e.target.value);
-                      const slug = e.target.value
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/^-|-$/g, "");
-                      form.setFieldValue("slug", slug);
-                    }}
-                  />
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-destructive text-sm">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+          <form onSubmit={onSubmit} class="space-y-4">
+            <div class="space-y-2">
+              <Label for="name">组织名称</Label>
+              <Input
+                id="name"
+                value={name()}
+                placeholder="我的组织"
+                onValueChange={(value) => {
+                  setName(value);
+                  const nextSlug = value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, "");
+                  setSlug(nextSlug);
+                }}
+              />
+              <Show when={errors().name}>
+                {(msg) => <p class="text-destructive text-sm">{msg()}</p>}
+              </Show>
+            </div>
 
-            <form.Field name="slug">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Slug</Label>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    placeholder="my-org"
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  <p className="text-muted-foreground text-xs">
-                    用于 URL: /org/{field.state.value || "slug"}
-                  </p>
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-destructive text-sm">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+            <div class="space-y-2">
+              <Label for="slug">Slug</Label>
+              <Input
+                id="slug"
+                value={slug()}
+                placeholder="my-org"
+                onValueChange={(value) => {
+                  setSlug(value);
+                }}
+              />
+              <p class="text-muted-foreground text-xs">用于 URL: /org/{slug() || "slug"}</p>
+              <Show when={errors().slug}>
+                {(msg) => <p class="text-destructive text-sm">{msg()}</p>}
+              </Show>
+            </div>
 
-            <div className="flex gap-3 pt-2">
+            <div class="flex gap-3 pt-2">
               <Button type="button" variant="outline" onClick={() => navigate({ to: "/me" })}>
                 取消
               </Button>
-              <form.Subscribe>
-                {(state) => (
-                  <Button type="submit" disabled={!state.canSubmit || state.isSubmitting}>
-                    {state.isSubmitting ? "创建中..." : "创建组织"}
-                  </Button>
-                )}
-              </form.Subscribe>
+              <Button type="submit" disabled={submitting()}>
+                {submitting() ? "创建中..." : "创建组织"}
+              </Button>
             </div>
           </form>
         </CardContent>

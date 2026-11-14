@@ -1,8 +1,8 @@
 import type { OrganizationAccessContext } from "@org-saas/api/contracts/organization";
 import { auth } from "@org-saas/auth";
-import { queryOptions } from "@tanstack/react-query";
-import { createIsomorphicFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
+import { queryOptions } from "@tanstack/solid-query";
+import { createIsomorphicFn } from "@tanstack/solid-start";
+import { getRequestHeaders } from "@tanstack/solid-start/server";
 
 import { authClient } from "@/lib/auth-client";
 import {

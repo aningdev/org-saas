@@ -1,5 +1,5 @@
 import { createSessionGetter } from "@org-saas/auth/session";
-import { createMiddleware } from "@tanstack/react-start";
+import { createMiddleware } from "@tanstack/solid-start";
 
 export const authMiddleware = createMiddleware().server(async ({ next, request }) => {
   return next({

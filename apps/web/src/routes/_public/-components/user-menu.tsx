@@ -1,4 +1,10 @@
-import { Button } from "@org-saas/ui/components/button";
+import { useQuery, useQueryClient } from "@tanstack/solid-query";
+import { Link, useNavigate } from "@tanstack/solid-router";
+import { Loading, Show } from "solid-js";
+
+import { getSession } from "@/functions/auth.fn";
+import { authClient } from "@/lib/auth-client";
+import { Button, buttonVariants } from "@/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,67 +13,65 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@org-saas/ui/components/dropdown-menu";
-import { Skeleton } from "@org-saas/ui/components/skeleton";
-import { toast } from "@org-saas/ui/components/toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
-
-import { getSession } from "@/functions/auth.fn";
-import { authClient } from "@/lib/auth-client";
+} from "@/ui/dropdown-menu";
+import { Skeleton } from "@/ui/skeleton";
+import { toast } from "@/ui/toast";
 
 export function UserMenu() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: session, isPending } = useQuery({
+  const sessionQuery = useQuery(() => ({
     queryKey: ["session"],
     queryFn: () => getSession(),
-  });
-
-  if (isPending) {
-    return <Skeleton className="h-9 w-24" />;
-  }
-
-  if (!session?.user) {
-    return (
-      <Link to="/login" search={{ redirect: undefined }}>
-        <Button variant="outline">Sign In</Button>
-      </Link>
-    );
-  }
+  }));
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>
-        {session.user.name}
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>{session.user.email}</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => navigate({ to: "/me" })}>个人中心</DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={() => {
-              void authClient.signOut({
-                fetchOptions: {
-                  onSuccess: () => {
-                    queryClient.clear();
-                    void navigate({ to: "/" });
-                  },
-                  onError: (error) => {
-                    toast.add({ title: error.error.message ?? "退出失败", type: "error" });
-                  },
-                },
-              });
-            }}
-          >
-            Sign Out
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Loading fallback={<Skeleton class="h-9 w-24" />}>
+      <Show
+        when={sessionQuery.data?.user}
+        fallback={
+          <Link to="/login" search={{ redirect: undefined }}>
+            <Button variant="outline">Sign In</Button>
+          </Link>
+        }
+      >
+        {(user) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger class={buttonVariants({ variant: "outline" })}>
+              {user().name}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent class="bg-card">
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>{user().email}</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void navigate({ to: "/me" })}>
+                  个人中心
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    void authClient.signOut({
+                      fetchOptions: {
+                        onSuccess: () => {
+                          queryClient.clear();
+                          void navigate({ to: "/" });
+                        },
+                        onError: (error) => {
+                          toast.add({ title: error.error.message ?? "退出失败", type: "error" });
+                        },
+                      },
+                    });
+                  }}
+                >
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </Show>
+    </Loading>
   );
 }

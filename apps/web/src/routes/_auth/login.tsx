@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { createFileRoute } from "@tanstack/solid-router";
+import { createSignal, Show } from "solid-js";
 
 import SignInForm from "@/components/sign-in-form";
 import SignUpForm from "@/components/sign-up-form";
@@ -13,13 +13,18 @@ export const Route = createFileRoute("/_auth/login")({
 });
 
 function RouteComponent() {
-  const [showSignIn, setShowSignIn] = useState(false);
-  const { redirect } = Route.useSearch();
-  const redirectTo = getSignInDestination(redirect);
+  const [showSignIn, setShowSignIn] = createSignal(false);
+  const search = Route.useSearch();
+  const redirectTo = () => getSignInDestination(search().redirect);
 
-  return showSignIn ? (
-    <SignInForm redirectTo={redirectTo} onSwitchToSignUp={() => setShowSignIn(false)} />
-  ) : (
-    <SignUpForm redirectTo={redirectTo} onSwitchToSignIn={() => setShowSignIn(true)} />
+  return (
+    <Show
+      when={showSignIn()}
+      fallback={
+        <SignUpForm redirectTo={redirectTo()} onSwitchToSignIn={() => setShowSignIn(true)} />
+      }
+    >
+      <SignInForm redirectTo={redirectTo()} onSwitchToSignUp={() => setShowSignIn(false)} />
+    </Show>
   );
 }

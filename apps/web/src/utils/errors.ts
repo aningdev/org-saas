@@ -1,4 +1,4 @@
-import { redirect } from "@tanstack/react-router";
+import { redirect } from "@tanstack/solid-router";
 
 /**
  * 403 Forbidden - 无权限访问

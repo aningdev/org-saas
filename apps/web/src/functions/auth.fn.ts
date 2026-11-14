@@ -1,5 +1,5 @@
 import { auth } from "@org-saas/auth";
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/solid-start";
 
 import { authMiddleware } from "@/middleware/auth";
 

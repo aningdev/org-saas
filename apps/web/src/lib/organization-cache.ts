@@ -1,4 +1,4 @@
-import type { QueryClient, QueryKey } from "@tanstack/react-query";
+import type { QueryClient, QueryKey } from "@tanstack/solid-query";
 
 import { organizationListQueryKey, organizationQueryKeys } from "./organization-query-keys";
 

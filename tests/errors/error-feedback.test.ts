@@ -1,32 +1,19 @@
 import { ORPCError } from "@orpc/client";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createQueryClient } from "../../apps/web/src/utils/orpc";
+const addToast = vi.hoisted(() =>
+  vi.fn<
+    (feedback: {
+      title: string;
+      description?: string;
+      actionProps?: { children: string; onClick: () => void };
+    }) => string
+  >(() => "test-toast"),
+);
 
-const { addToast, toastModulePath } = await vi.hoisted(async () => {
-  const { createRequire } = await import("node:module");
-  const resolveFromWeb = createRequire(`${process.cwd()}/apps/web/package.json`);
-  return {
-    toastModulePath: resolveFromWeb.resolve("@org-saas/ui/components/toast"),
-    addToast: vi.fn<
-      (feedback: {
-        title: string;
-        description?: string;
-        actionProps?: { children: string; onClick: () => void };
-      }) => string
-    >(() => "test-toast"),
-  };
-});
+vi.mock("../../apps/web/src/ui/toast", () => ({ toast: { add: addToast } }));
 
-// 隔离同构客户端初始化和 Toast 渲染，保留真实查询缓存与错误反馈行为。
-vi.mock("@org-saas/api/context", () => ({ createContext: () => ({}) }));
-vi.mock("@org-saas/api/index", () => ({ standardLimiter: {} }));
-vi.mock("@org-saas/api/routers/index", () => ({ appRouter: {} }));
-vi.mock(toastModulePath, () => ({ toast: { add: addToast } }));
-vi.mock("@tanstack/react-start", () => ({
-  createIsomorphicFn: () => ({ server: () => ({ client: () => () => ({}) }) }),
-}));
-vi.mock("@tanstack/react-start/server", () => ({ getRequestHeaders: () => new Headers() }));
+const { createQueryClient } = await import("../../apps/web/src/utils/query-client");
 
 afterEach(() => {
   addToast.mockClear();

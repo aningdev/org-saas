@@ -1,98 +1,92 @@
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@org-saas/ui/components/dialog";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@org-saas/ui/components/field";
-import { Input } from "@org-saas/ui/components/input";
-import { toast } from "@org-saas/ui/components/toast";
-import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/solid-query";
+import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 import { useOrgContext } from "@/lib/org-context";
 import { syncOrganizationCacheAfterChange } from "@/lib/organization-cache";
+import { Button } from "@/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/ui/dialog";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/ui/field";
+import { Input } from "@/ui/input";
+import { toast } from "@/ui/toast";
 
-interface CreateTeamDialogProps {
+const schema = z.object({ name: z.string().min(2, "团队名称至少 2 个字符") });
+
+export function CreateTeamDialog(props: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   orgId: string;
-}
-
-export function CreateTeamDialog({ open, onOpenChange, orgId }: CreateTeamDialogProps) {
-  const { userId } = useOrgContext();
+}) {
+  const orgCtx = useOrgContext();
   const queryClient = useQueryClient();
-  const form = useForm({
-    defaultValues: { name: "" },
-    onSubmit: async ({ value }) => {
+  const [name, setName] = createSignal("");
+  const [errors, setErrors] = createSignal<Array<{ message?: string }>>([]);
+  const [submitting, setSubmitting] = createSignal(false);
+
+  const onSubmit = async (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const parsed = schema.safeParse({ name: name() });
+    if (!parsed.success) {
+      setErrors(parsed.error.issues.map((issue) => ({ message: issue.message })));
+      return;
+    }
+    setErrors([]);
+    setSubmitting(true);
+    try {
       const result = await authClient.organization.createTeam({
-        name: value.name,
-        organizationId: orgId,
+        name: parsed.data.name,
+        organizationId: props.orgId,
       });
       if (result.error) {
         toast.add({ title: result.error.message ?? "创建失败", type: "error" });
         return;
       }
-
       toast.add({ title: "团队创建成功", type: "success" });
-      onOpenChange(false);
-      form.reset();
-      await syncOrganizationCacheAfterChange(queryClient, userId, orgId, "team-created");
-    },
-    validators: {
-      onSubmit: z.object({ name: z.string().min(2, "团队名称至少 2 个字符") }),
-    },
-  });
+      props.onOpenChange(false);
+      setName("");
+      await syncOrganizationCacheAfterChange(
+        queryClient,
+        orgCtx.userId,
+        props.orgId,
+        "team-created",
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={props.open} onOpenChange={props.onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>创建团队</DialogTitle>
           <DialogDescription>在组织内创建一个新团队</DialogDescription>
         </DialogHeader>
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void form.handleSubmit();
-          }}
-        >
-          <FieldGroup className="gap-4">
-            <form.Field name="name">
-              {(field) => {
-                const invalid = field.state.meta.errors.length > 0;
-                return (
-                  <Field data-invalid={invalid}>
-                    <FieldLabel htmlFor={field.name}>团队名称</FieldLabel>
-                    <Input
-                      id={field.name}
-                      placeholder="如：前端团队"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => field.handleChange(event.target.value)}
-                      aria-invalid={invalid}
-                    />
-                    {invalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <form onSubmit={onSubmit}>
+          <FieldGroup class="gap-4">
+            <Field data-invalid={errors().length > 0 || undefined}>
+              <FieldLabel for="team-name">团队名称</FieldLabel>
+              <Input
+                id="team-name"
+                placeholder="如：前端团队"
+                value={name()}
+                onValueChange={(value) => {
+                  setName(value);
+                }}
+              />
+              <Show when={errors().length > 0}>
+                <FieldError errors={errors()} />
+              </Show>
+            </Field>
+            <div class="flex justify-end gap-3">
+              <Button type="button" variant="outline" onClick={() => props.onOpenChange(false)}>
                 取消
               </Button>
-              <form.Subscribe>
-                {(state) => (
-                  <Button type="submit" disabled={!state.canSubmit || state.isSubmitting}>
-                    {state.isSubmitting ? "创建中…" : "创建团队"}
-                  </Button>
-                )}
-              </form.Subscribe>
+              <Button type="submit" disabled={submitting()}>
+                {submitting() ? "创建中…" : "创建团队"}
+              </Button>
             </div>
           </FieldGroup>
         </form>

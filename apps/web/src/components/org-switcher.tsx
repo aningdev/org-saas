@@ -1,4 +1,10 @@
-import { Button } from "@org-saas/ui/components/button";
+import { useQuery } from "@tanstack/solid-query";
+import { useNavigate } from "@tanstack/solid-router";
+import { For, Show } from "solid-js";
+
+import { UserAvatar } from "@/components/user-avatar";
+import { orgListQueryOptions } from "@/lib/query-options";
+import { Button } from "@/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,67 +13,133 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@org-saas/ui/components/dropdown-menu";
-import { Skeleton } from "@org-saas/ui/components/skeleton";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { Building2, ChevronsUpDown, Plus } from "lucide-react";
+} from "@/ui/dropdown-menu";
+import { Skeleton } from "@/ui/skeleton";
 
-import { orgListQueryOptions } from "@/lib/query-options";
-
-import { UserAvatar } from "./user-avatar";
-
-export function OrgSwitcher({ activeOrgSlug, userId }: { activeOrgSlug?: string; userId: string }) {
+export function OrgSwitcher(props: { activeOrgSlug?: string; userId: string }) {
   const navigate = useNavigate();
-  const { data: orgs = [], isPending } = useQuery(orgListQueryOptions(userId));
-  const activeOrg = orgs.find((o: { slug: string }) => o.slug === activeOrgSlug);
-
-  if (isPending) {
-    return <Skeleton className="h-10 w-full" />;
-  }
+  const orgsQuery = useQuery(() => orgListQueryOptions(props.userId));
+  const orgs = () => orgsQuery.data ?? [];
+  const activeOrg = () => orgs().find((o: { slug: string }) => o.slug === props.activeOrgSlug);
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" className="w-full justify-between" />}>
-        <div className="flex items-center gap-2 truncate text-sm">
-          {activeOrg ? (
-            <>
-              <UserAvatar name={activeOrg.name} image={activeOrg.logo} size="sm" />
-              <span className="truncate font-semibold">{activeOrg.name}</span>
-            </>
-          ) : (
-            <>
-              <Building2 className="size-4" />
-              <span className="text-muted-foreground">选择组织</span>
-            </>
+    <Show when={!orgsQuery.isPending} fallback={<Skeleton class="h-10 w-full" />}>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={(triggerProps) => (
+            <Button {...triggerProps} variant="outline" class="w-full justify-between" />
           )}
-        </div>
-        <ChevronsUpDown className="ml-auto size-4 shrink-0" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="bg-card w-56" align="start">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>组织</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {orgs.map((org) => (
-            <DropdownMenuItem
-              key={org.id}
-              onClick={() =>
-                void navigate({
-                  to: `/org/${org.slug}`,
-                })
+        >
+          <div class="flex items-center gap-2 truncate text-sm">
+            <Show
+              when={activeOrg()}
+              fallback={
+                <>
+                  <BuildingIcon class="size-4" />
+                  <span class="text-muted-foreground">选择组织</span>
+                </>
               }
             >
-              <UserAvatar name={org.name} image={org.logo} size="sm" />
-              <span className="truncate">{org.name}</span>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => navigate({ to: "/me/organizations/new" })}>
-          <Plus className="size-4" />
-          <span>创建新组织</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+              {(org) => (
+                <>
+                  <UserAvatar name={org().name} image={org().logo} size="sm" />
+                  <span class="truncate font-semibold">{org().name}</span>
+                </>
+              )}
+            </Show>
+          </div>
+          <ChevronsIcon class="ml-auto size-4 shrink-0" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent class="bg-card w-56" align="start">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>组织</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <For each={orgs()}>
+              {(org) => (
+                <DropdownMenuItem
+                  onSelect={() => {
+                    void navigate({
+                      to: "/org/$orgSlug",
+                      params: { orgSlug: org.slug },
+                    });
+                  }}
+                >
+                  <UserAvatar name={org.name} image={org.logo} size="sm" />
+                  <span class="truncate">{org.name}</span>
+                </DropdownMenuItem>
+              )}
+            </For>
+          </DropdownMenuGroup>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onSelect={() => {
+              void navigate({ to: "/me/organizations/new" });
+            }}
+          >
+            <PlusIcon class="size-4" />
+            <span>创建新组织</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </Show>
+  );
+}
+
+function BuildingIcon(props: { class?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={props.class}
+    >
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </svg>
+  );
+}
+
+function ChevronsIcon(props: { class?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={props.class}
+    >
+      <path d="m7 15 5 5 5-5" />
+      <path d="m7 9 5-5 5 5" />
+    </svg>
+  );
+}
+
+function PlusIcon(props: { class?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      class={props.class}
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
   );
 }

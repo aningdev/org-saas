@@ -1,55 +1,62 @@
-import { Button } from "@org-saas/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@org-saas/ui/components/card";
-import { Input } from "@org-saas/ui/components/input";
-import { Label } from "@org-saas/ui/components/label";
-import { toast } from "@org-saas/ui/components/toast";
-import { useForm } from "@tanstack/react-form";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/solid-router";
+import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 
 import { UserAvatar } from "@/components/user-avatar";
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/card";
+import { Input } from "@/ui/input";
+import { Label } from "@/ui/label";
+import { toast } from "@/ui/toast";
 import { orpc } from "@/utils/orpc";
+
+const schema = z.object({
+  name: z.string().min(2, "名称至少 2 个字符"),
+  image: z.string().url("请输入有效的 URL").or(z.literal("")),
+});
 
 export const Route = createFileRoute("/_authenticated/me/settings/profile/")({
   component: ProfilePage,
 });
 
 function ProfilePage() {
-  const { user } = Route.useRouteContext();
+  const routeCtx = Route.useRouteContext();
+  const [name, setName] = createSignal(routeCtx().user.name);
+  const [image, setImage] = createSignal(routeCtx().user.image ?? "");
+  const [errors, setErrors] = createSignal<Record<string, string>>({});
+  const [submitting, setSubmitting] = createSignal(false);
 
-  const form = useForm({
-    defaultValues: {
-      name: user.name,
-      image: user.image ?? "",
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        await orpc.user.updateProfile.call({
-          name: value.name || undefined,
-          image: value.image || undefined,
-        });
-        toast.add({ title: "个人信息已更新", type: "success" });
-      } catch {
-        toast.add({ title: "更新失败", type: "error" });
+  const onSubmit = async (event: Event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const parsed = schema.safeParse({ name: name(), image: image() });
+    if (!parsed.success) {
+      const next: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const key = String(issue.path[0] ?? "");
+        if (key && !next[key]) next[key] = issue.message;
       }
-    },
-    validators: {
-      onSubmit: z.object({
-        name: z.string().min(2, "名称至少 2 个字符"),
-        image: z.string().url("请输入有效的 URL").or(z.literal("")),
-      }),
-    },
-  });
+      setErrors(next);
+      return;
+    }
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await orpc.user.updateProfile.call({
+        name: parsed.data.name || undefined,
+        image: parsed.data.image || undefined,
+      });
+      toast.add({ title: "个人信息已更新", type: "success" });
+    } catch {
+      toast.add({ title: "更新失败", type: "error" });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-2xl font-bold">个人资料</h1>
+    <div class="mx-auto max-w-2xl p-6">
+      <h1 class="mb-6 text-2xl font-bold">个人资料</h1>
 
       <Card>
         <CardHeader>
@@ -57,68 +64,47 @@ function ProfilePage() {
           <CardDescription>更新你的个人资料</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex items-center gap-4">
-            <UserAvatar name={user.name} image={user.image} size="lg" />
+          <div class="mb-6 flex items-center gap-4">
+            <UserAvatar name={routeCtx().user.name} image={routeCtx().user.image} size="lg" />
             <div>
-              <p className="font-medium">{user.name}</p>
-              <p className="text-muted-foreground text-sm">{user.email}</p>
+              <p class="font-medium">{routeCtx().user.name}</p>
+              <p class="text-muted-foreground text-sm">{routeCtx().user.email}</p>
             </div>
           </div>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              void form.handleSubmit();
-            }}
-            className="space-y-4"
-          >
-            <form.Field name="name">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>名称</Label>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-destructive text-sm">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+          <form onSubmit={onSubmit} class="space-y-4">
+            <div class="space-y-2">
+              <Label for="name">名称</Label>
+              <Input
+                id="name"
+                value={name()}
+                onValueChange={(value) => {
+                  setName(value);
+                }}
+              />
+              <Show when={errors().name}>
+                {(msg) => <p class="text-destructive text-sm">{msg()}</p>}
+              </Show>
+            </div>
 
-            <form.Field name="image">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>头像 URL</Label>
-                  <Input
-                    id={field.name}
-                    value={field.state.value}
-                    placeholder="https://example.com/avatar.png"
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                  />
-                  {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-destructive text-sm">
-                      {error?.message}
-                    </p>
-                  ))}
-                </div>
-              )}
-            </form.Field>
+            <div class="space-y-2">
+              <Label for="image">头像 URL</Label>
+              <Input
+                id="image"
+                value={image()}
+                placeholder="https://example.com/avatar.png"
+                onValueChange={(value) => {
+                  setImage(value);
+                }}
+              />
+              <Show when={errors().image}>
+                {(msg) => <p class="text-destructive text-sm">{msg()}</p>}
+              </Show>
+            </div>
 
-            <form.Subscribe>
-              {(state) => (
-                <Button type="submit" disabled={!state.canSubmit || state.isSubmitting}>
-                  {state.isSubmitting ? "保存中..." : "保存"}
-                </Button>
-              )}
-            </form.Subscribe>
+            <Button type="submit" disabled={submitting()}>
+              {submitting() ? "保存中..." : "保存"}
+            </Button>
           </form>
         </CardContent>
       </Card>

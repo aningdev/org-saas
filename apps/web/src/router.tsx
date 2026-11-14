@@ -1,6 +1,7 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import { createRouter as createTanStackRouter } from "@tanstack/react-router";
+import { QueryClientProvider } from "@tanstack/solid-query";
+import { createRouter as createTanStackRouter } from "@tanstack/solid-router";
 
+import "@ui-sdk/core/web.css";
 import "./index.css";
 import { ErrorBoundary, Loader, NotFoundPage } from "@/components/fallback";
 
@@ -17,15 +18,15 @@ export const getRouter = () => {
     context: { orpc, queryClient },
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: () => <NotFoundPage />,
-    defaultErrorComponent: ({ error }) => <ErrorBoundary error={error} />,
-    Wrap: ({ children }) => (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    defaultErrorComponent: (props) => <ErrorBoundary error={props.error} />,
+    Wrap: (props) => (
+      <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
     ),
   });
   return router;
 };
 
-declare module "@tanstack/react-router" {
+declare module "@tanstack/solid-router" {
   interface Register {
     router: ReturnType<typeof getRouter>;
   }
