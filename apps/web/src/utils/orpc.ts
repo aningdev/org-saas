@@ -8,6 +8,8 @@ import { createTanstackQueryUtils } from "@orpc/tanstack-query";
 import { createIsomorphicFn } from "@tanstack/solid-start";
 import { getRequestHeaders } from "@tanstack/solid-start/server";
 
+import { rpcJsonSerializer } from "./rpc-json";
+
 export { createQueryClient } from "./query-client";
 
 const getORPCClient = createIsomorphicFn()
@@ -38,4 +40,4 @@ const getORPCClient = createIsomorphicFn()
   );
 
 export const client: ApiContractClient = getORPCClient();
-export const orpc = createTanstackQueryUtils(client);
+export const orpc = createTanstackQueryUtils(client, { serializer: rpcJsonSerializer });

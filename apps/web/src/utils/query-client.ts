@@ -1,7 +1,9 @@
 import { COMMON_ERROR_STATUS_MAP, ORPCError } from "@orpc/client";
+import { createHydrationOptions } from "@orpc/tanstack-query";
 import { QueryCache, QueryClient } from "@tanstack/solid-query";
 
 import { toast } from "../ui/toast";
+import { rpcJsonSerializer } from "./rpc-json";
 
 export function createQueryClient(): QueryClient {
   const queryClient = new QueryClient({
@@ -10,6 +12,8 @@ export function createQueryClient(): QueryClient {
         staleTime: 60 * 1000,
         retry: false,
       },
+      // Preserve Date / BigInt / Set / Map across TanStack Query SSR hydration.
+      ...createHydrationOptions(rpcJsonSerializer),
     },
     queryCache: new QueryCache({
       onError: (error, query) => {

@@ -7,7 +7,8 @@
 - `src/context.ts`：从请求 headers 创建请求级 session getter；受保护 procedure 在认证 middleware 中按需读取会话。
 - `src/index.ts`：contract implementer、认证中间件、限流和日志能力。
 - `src/routers/index.ts`：组合业务路由；各子路由实现具体业务。
-- HTTP 接入位于 `apps/web/src/routes/api/rpc.$.ts`；同构客户端位于 `apps/web/src/utils/orpc.ts`。
+- HTTP 接入位于 `apps/web/src/routes/api/rpc.$.ts`；同构客户端位于 `apps/web/src/utils/orpc.ts`（`@orpc/tanstack-query` + 共享 `RPCJsonSerializer`）。
+- 业务 DTO 优先用 JSON 友好类型（如 `z.string().datetime()`）；若输出含原生 `Date` / `BigInt` / `Set` / `Map`，依赖 Web 的 QueryClient hydration 序列化，勿改成仅浏览器 JSON。
 
 认证配置遵循 [Auth 约定](../auth/AGENTS.md)，数据库访问遵循 [DB 约定](../db/AGENTS.md)。
 

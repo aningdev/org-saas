@@ -35,6 +35,7 @@
 
 - 业务 RPC 使用 `src/utils/orpc.ts` 提供的 `orpc` / `client`，不在组件中手写 `fetch` 调 RPC；认证及组织插件调用使用 `authClient`。
 - 查询使用 `@tanstack/solid-query`：选项以 accessor 传入（如 `useQuery(() => ...)`）；路由主体数据由 `loader` 使用 `await ensureQueryData(...)` 预取；导航等待由路由 `pendingComponent` / `<Loading>` 处理。
+- QueryClient 通过 `createHydrationOptions(rpcJsonSerializer)` 做 SSR 脱水／注水，与 `createTanstackQueryUtils` 共用同一 `RPCJsonSerializer`（见 `src/utils/rpc-json.ts`），以保留 `Date` 等非 JSON 类型。
 - 查询配置集中复用；涉及组织的数据，查询键包含组织标识。变更成功后通过 `queryClient.invalidateQueries(...)` 更新受影响查询。
 - 用户操作提供明确的等待、成功和失败反馈；适合即时提示的操作使用 `@/ui/toast`。
 - Better Auth 操作检查返回值的 `error`；路由访问错误使用现有错误类型并交给 fallback，业务 RPC 按契约处理错误。
