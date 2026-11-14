@@ -1,4 +1,3 @@
-import { auth } from "@org-saas/auth";
 import { auditEvents, createAuditRecord } from "@org-saas/auth/audit-records";
 import { organizationHasPermission } from "@org-saas/auth/organization-has-permission";
 import { resolveOrganizationOwner } from "@org-saas/auth/organization-owner";
@@ -59,14 +58,9 @@ export const organizationRouter = {
         context.session.user.id,
         context.headers,
       );
-      // Better Auth client defaults (omit organizationId) follow active org.
-      // Authorization still uses membership + explicit ids / hasPermission.
-      if (!access.archivedAt) {
-        await auth.api.setActiveOrganization({
-          body: { organizationId: organizationRow.id },
-          headers: context.headers,
-        });
-      }
+      // Do not call setActiveOrganization here: our policy treats it as an org
+      // write (ownerMutationVersion + transaction). Navigation must stay read-only;
+      // authClient mutations should pass organizationId explicitly.
       return {
         organization: {
           ...organizationRow,
