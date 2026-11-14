@@ -1,9 +1,18 @@
-import { Loader2 } from "lucide-react";
-
 export function Loader() {
   return (
-    <div className="flex h-full items-center justify-center pt-8">
-      <Loader2 className="animate-spin" />
+    <div class="flex h-full items-center justify-center pt-8">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="animate-spin"
+      >
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+      </svg>
     </div>
   );
 }

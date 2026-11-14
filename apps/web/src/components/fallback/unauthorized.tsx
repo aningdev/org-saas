@@ -1,47 +1,55 @@
-import { Button } from "@org-saas/ui/components/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@org-saas/ui/components/card";
-import { useRouter } from "@tanstack/react-router";
-import { LogIn, Shield } from "lucide-react";
+import { useRouter } from "@tanstack/solid-router";
 
+import { Button } from "@/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/ui/card";
 import type { UnauthorizedError } from "@/utils/errors";
 
 interface UnauthorizedPageProps {
   error: UnauthorizedError;
 }
 
-export function UnauthorizedPage({ error }: UnauthorizedPageProps) {
+export function UnauthorizedPage(props: UnauthorizedPageProps) {
   const router = useRouter();
 
   const handleLogin = () => {
-    void router.navigate({
-      to: error.redirectTo,
-      search: { redirect: window.location.href },
-    });
+    const target = new URL(props.error.redirectTo, window.location.origin);
+    target.searchParams.set("redirect", window.location.href);
+    router.history.push(target.pathname + target.search);
   };
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div class="flex min-h-[50vh] items-center justify-center p-4">
+      <Card class="w-full max-w-md">
         <CardHeader>
-          <div className="flex items-center gap-2">
-            <Shield className="text-destructive h-6 w-6" />
+          <div class="flex items-center gap-2">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              class="text-destructive h-6 w-6"
+            >
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+            </svg>
             <CardTitle>需要登录</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="bg-muted rounded-md p-3">
-            <p className="text-muted-foreground text-sm">{error.message}</p>
+        <CardContent class="space-y-4">
+          <div class="bg-muted rounded-md p-3">
+            <p class="text-muted-foreground text-sm">{props.error.message}</p>
           </div>
 
-          <div className="rounded-md bg-blue-50 p-3 dark:bg-blue-950">
-            <p className="text-sm text-blue-900 dark:text-blue-100">
+          <div class="rounded-md bg-blue-50 p-3 dark:bg-blue-950">
+            <p class="text-sm text-blue-900 dark:text-blue-100">
               请登录以继续访问此页面。登录后您将返回到您原本想访问的页面。
             </p>
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleLogin} className="w-full">
-            <LogIn className="mr-2 h-4 w-4" />
+          <Button onClick={handleLogin} class="w-full">
             前往登录
           </Button>
         </CardFooter>
