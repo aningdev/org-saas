@@ -1,8 +1,19 @@
 # 代码组织
 
+## Stack
+
+**主站**：TanStack Start / Router / Query（Solid 2.0 RC）、`@ui-sdk/solid`、oRPC、Better Auth、Drizzle / PostgreSQL  
+_Avoid_：主站引入 React、`@org-saas/ui`、Radix 替代 ui-sdk
+
+**文档站**：Fumadocs + React + TanStack Start（React）
+
+**工具链**：Bun Workspaces、vite-plus（`check` / `fix` / `test`）、GitHub Actions 调用同一入口
+
+领域词汇见 [GLOSSARY.md](GLOSSARY.md)。部署关系见 [应用架构](application.md)。
+
 ## Monorepo 与职责划分
 
-项目使用 Bun Workspaces。应用负责各访问端和部署入口，共享包承载跨端可复用的能力。共享代码包不等于独立部署服务，部署关系见 [应用架构](application.md)。
+项目使用 Bun Workspaces。应用负责各访问端和部署入口，共享包承载跨端可复用的能力。共享代码包不等于独立部署服务。
 
 ```text
 org-saas/
@@ -62,16 +73,27 @@ API 契约与实现分开：`src/contracts/` 定义输入、输出与预期错�
 ```text
 apps/web/src/
 ├── components/              # 跨页面业务组件与 fallback
-├── hooks/                   # 可复用 Solid 组合逻辑
-├── lib/                     # auth-client、组织上下文、查询配置
+├── hooks/                   # 可复用 Solid 组合逻辑（权限等）
+├── lib/                     # auth-client、组织上下文、查询键与 options
 ├── ui/                      # ui-sdk 的 Tailwind 样式封装
 ├── functions/               # Web 所需的 Server Functions
 ├── middleware/              # TanStack Start 服务端中间件
-├── utils/                   # guards、errors、同构 oRPC 客户端
+├── utils/                   # guards、errors、return-target、同构 oRPC / QueryClient
 ├── routes/                  # 页面路由、布局及 HTTP 入口
 ├── router.tsx               # Router 与 QueryClient 创建
 └── routeTree.gen.ts         # 路由工具生成
 ```
+
+| 目录          | 放什么                                                     | 不放什么                         |
+| ------------- | ---------------------------------------------------------- | -------------------------------- |
+| `components/` | 跨路由业务组件、fallback                                   | 纯视觉原语（进 `ui/`）           |
+| `ui/`         | ui-sdk 封装与主题相关视觉组件                              | 组织／权限业务逻辑               |
+| `lib/`        | 认证客户端、组织上下文、查询配置                           | HTTP 协议入口、页面组件          |
+| `utils/`      | 页面守卫、错误映射、oRPC／QueryClient 工厂、返回地址规范化 | 通用「杂项」；新概念先命名再建夹 |
+| `hooks/`      | 跨页面可复用的 Solid 组合（如权限）                        | 单页一次性逻辑（放路由旁）       |
+| `functions/`  | 仅 Web 需要的 Server Functions                             | 多端业务（进 `packages/api`）    |
+| `middleware/` | Start 服务端中间件                                         | 业务校验与授权实现               |
+| `routes/`     | 路由、布局、`-components/`、`api/` HTTP 接入               | 共享业务组件                     |
 
 业务实现需要同时服务 Web、小程序和 App 时，放共享 API；仅用于 Web 会话、守卫或页面适配的服务端能力放 `functions/`。HTTP 路由接入协议并调用对应包，不在入口积累业务处理。
 

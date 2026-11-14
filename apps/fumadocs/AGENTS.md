@@ -13,7 +13,7 @@
 ## 内容与实现
 
 - 内容修改优先在 `content/docs/` 完成；调整导航、集合或路径时，同时检查文档链接和搜索。
-- 页面使用 Fumadocs 的布局与组件体系；不套用主站业务 UI 的 shadcn 组件要求。样式沿用本应用的 Tailwind / Fumadocs 主题，图标使用现有 Lucide 集成。
+- 页面使用 Fumadocs 的布局与组件体系；不套用主站 `apps/web/src/ui/`（ui-sdk）或遗留 `packages/ui`。样式沿用本应用的 Tailwind / Fumadocs 主题，图标使用现有 Lucide 集成。
 - 修改路由源文件，不手工编辑 `src/routeTree.gen.ts`；MDX 集合产物通过现有 Fumadocs 插件和生成流程更新。
 - 保持 SSR 兼容；浏览器 API 仅在客户端生命周期或事件中使用。路由和 Server Functions 分别参考 `tanstack-router`、`tanstack-start` 技能。
 
