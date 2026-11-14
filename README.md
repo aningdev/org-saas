@@ -18,7 +18,6 @@
 - **认证**：Better Auth（Admin + Organization）
 - **数据**：Drizzle ORM + PostgreSQL
 - **工具**：Bun Workspaces、vite-plus（`check` / `fix` / `test`）
-- **遗留**：`packages/ui`（React / shadcn），主站不再依赖
 
 ## 快速开始
 
@@ -59,8 +58,7 @@ org-saas/
 │   ├── auth/             # Better Auth
 │   ├── db/               # Drizzle 模型
 │   ├── env/              # 环境变量校验
-│   ├── config/           # 共享 TS 配置
-│   └── ui/               # 遗留 React/shadcn（非主站路径）
+│   └── config/           # 共享 TS 配置
 ├── docs/                 # 架构、ADR、实施计划
 └── tests/                # 集中测试
 ```

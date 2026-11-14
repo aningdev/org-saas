@@ -19,7 +19,7 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 - `apps/web`：公开页面、认证流程、个人中心和组织业务页面（Solid 2 + TanStack Start）。
 - `apps/fumadocs`：独立文档应用，使用 Fumadocs（React）。
 - `apps/mini`：微信小程序，使用 TDesign、WXML 和 WXSS。
-- `packages/api`、`auth`、`db`、`ui`：共享业务 API、认证、数据访问；`packages/ui` 为遗留 React/shadcn 组件库，主站已改用 ui-sdk。
+- `packages/api`、`auth`、`db`：共享业务 API、认证、数据访问。
 - `packages/env`：环境变量校验；`packages/config`：共享 TypeScript 配置。
 
 本文件适用于整个仓库。子目录文件补充局部约定。
@@ -39,11 +39,10 @@ Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in 
 | 认证、会话、组织插件和权限配置 | [packages/auth/AGENTS.md](packages/auth/AGENTS.md)       |
 | 数据模型、关系和数据库变更     | [packages/db/AGENTS.md](packages/db/AGENTS.md)           |
 | 主站 UI（ui-sdk 封装）         | [apps/web/AGENTS.md](apps/web/AGENTS.md)（见 ui-sdk 节） |
-| 遗留 React/shadcn UI           | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)           |
 | 文档内容、文档路由和搜索       | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md)       |
 | 微信小程序页面、组件和样式     | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)               |
 
-框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs / shadcn 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
+框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
 
 ## 跨包约定
 

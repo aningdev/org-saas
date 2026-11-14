@@ -33,7 +33,7 @@
 | 决策记录 | 难以逆转或容易被误解的设计选择及原因     | [`docs/adr/`](../adr/)，含 [组织归档](../adr/0001-archive-organizations.md)、[Solid / ui-sdk](../adr/0003-solid-2-ui-sdk.md) |
 | 实施计划 | 改动入口、阶段、模型处理、验收与待办     | [权限体系](../implementation/permissions.md)、[Web 路由重构](../implementation/web-routing.md)                               |
 
-当前不单独维护 `docs/development/`。异常反馈的目标设计见 [异常反馈](error-feedback.md)；Web 的加载、缓存更新、表单、对话框和错误反馈编码规则放在 [Web 约定](../../apps/web/AGENTS.md)；主站 UI 封装约定见同一文件的 ui-sdk 节。`packages/ui` 为遗留 React/shadcn 库，仅在维护该包时读 [遗留 UI 约定](../../packages/ui/AGENTS.md)。技能库默认的 `docs/ARCHITECTURE.md` / `docs/GLOSSARY.md` 在本仓是指向本目录的指针。未来出现需要独立讲解的长篇教程时，再增加指南，并从对应约定链接过去。
+当前不单独维护 `docs/development/`。异常反馈的目标设计见 [异常反馈](error-feedback.md)；Web 的加载、缓存更新、表单、对话框和错误反馈编码规则放在 [Web 约定](../../apps/web/AGENTS.md)；主站 UI 封装约定见同一文件的 ui-sdk 节。技能库默认的 `docs/ARCHITECTURE.md` / `docs/GLOSSARY.md` 在本仓是指向本目录的指针。未来出现需要独立讲解的长篇教程时，再增加指南，并从对应约定链接过去。
 
 ## 维护方式
 
