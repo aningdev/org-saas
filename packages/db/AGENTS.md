@@ -14,6 +14,7 @@ Drizzle ORM / PostgreSQL 数据模型与共享数据访问。
 - 业务查询使用 Drizzle query builder；数据库内置函数和必要的 SQL 表达式可使用 Drizzle `sql`，不以裸 SQL 绕开业务数据访问层。
 - 新增或修改模型时同步检查关系、索引、约束和调用方。关系沿用 `src/schema/relations.ts` 的模式。
 - 认证 schema 与 [Auth 配置](../auth/AGENTS.md) 保持一致；使用生成工具更新时检查 diff，保留现有关系和必要约束。
+- 当前 ORM 在 Drizzle 1.0 RC（`defineRelations`）。改 Better Auth 插件或 `schema/auth.ts` 后：核对 `relations.ts`、在隔离库执行 `db:push`／生成迁移，并跑现有 `tests/organization` 与 auth 相关用例。不要把开发库当测试库。
 - 主键与默认值沿用现有模型；调整生成方式前核对调用方和数据库支持。
 - DB 约束保证存储完整性；API 输入校验表达业务边界，两者分别维护并保持一致。
 
