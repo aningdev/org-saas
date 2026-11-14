@@ -58,6 +58,8 @@ org-saas/
 │   ├── auth/             # Better Auth
 │   ├── db/               # Drizzle 模型
 │   └── env/              # 环境变量校验
+├── scripts/              # 仓库级检查（Layout 等）
+├── .vite-hooks/          # pre-commit → vp staged
 ├── tsconfig.base.json    # 共享 TypeScript 基础配置
 ├── tsconfig.package.json # 共享包编译配置
 ├── docs/                 # 架构、ADR、实施计划

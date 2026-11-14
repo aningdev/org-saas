@@ -11,9 +11,20 @@ _Avoid_：主站引入 React、Radix / shadcn / Base UI 替代 ui-sdk
 
 领域词汇见 [GLOSSARY.md](GLOSSARY.md)。部署关系见 [应用架构](application.md)。
 
-## Monorepo 与职责划分
+## Layout
 
-项目使用 Bun Workspaces。应用负责各访问端和部署入口，共享包承载跨端可复用的能力。共享代码包不等于独立部署服务。
+非隐藏顶层目录只允许下表；`bun run check` 经 `scripts/check-layout.ts` 校验，未列入的目录会使 check 失败。新增顶层目录须同时改本表与脚本白名单。隐藏目录中，下列为项目拥有；其它（如 `.vscode`）可为本地工具目录，不进入强制白名单。
+
+| 顶层目录       | 放什么                                            |
+| -------------- | ------------------------------------------------- |
+| `apps/`        | 可部署应用（`web`、`fumadocs`、`mini`）           |
+| `packages/`    | 跨应用共享包（`api`、`auth`、`db`、`env`）        |
+| `docs/`        | 架构、ADR、实施计划与研究                         |
+| `tests/`       | 全部自动化测试与辅助代码                          |
+| `scripts/`     | 仓库级检查／维护脚本（非业务）                    |
+| `.agents/`     | agent 技能（项目拥有）                            |
+| `.github/`     | CI 与 GitHub 配置（项目拥有）                     |
+| `.vite-hooks/` | 项目拥有的 Git hook 脚本（生成物在 `_/`，不入库） |
 
 ```text
 org-saas/
@@ -26,6 +37,11 @@ org-saas/
 │   ├── auth/                # Better Auth 配置、权限词表与会话入口
 │   ├── db/                  # Drizzle 模型、关系与数据库连接
 │   └── env/                 # 服务端、Web 与移动端环境校验
+├── scripts/                 # 仓库级脚本（如 Layout check）
+├── tests/                   # 集中测试
+├── .agents/                 # agent 技能
+├── .github/                 # CI
+├── .vite-hooks/             # pre-commit → vp staged
 ├── tsconfig.base.json       # 共享 TypeScript 基础配置
 ├── tsconfig.package.json    # 共享包编译配置（extends base）
 └── docs/
@@ -33,6 +49,10 @@ org-saas/
     ├── adr/                 # 设计决策及原因
     └── implementation/      # 实施计划与验收
 ```
+
+## Monorepo 与职责划分
+
+项目使用 Bun Workspaces。应用负责各访问端和部署入口，共享包承载跨端可复用的能力。共享代码包不等于独立部署服务。
 
 | 模块     | 职责                                          | 主要入口                                      |
 | -------- | --------------------------------------------- | --------------------------------------------- |
@@ -45,9 +65,9 @@ org-saas/
 
 微信小程序使用自身的 WXML、WXSS 和 TDesign，不复用 Web UI。主站 UI 使用 `@ui-sdk/solid`，封装在 `apps/web/src/ui/`。多端共享业务接口，而不是共享所有界面实现。
 
-## 依赖方向与公开接口
+## Layers
 
-服务端主依赖关系如下，图省略配置与 UI 细节。
+服务端依赖方向如下。图省略配置与 UI 细节；箭头表示允许的依赖。
 
 ```mermaid
 flowchart TB
@@ -63,9 +83,27 @@ flowchart TB
     WebClient --> AuthClient["Better Auth 客户端"]
 ```
 
-应用通过 `@org-saas/*` 的公开 exports 使用共享包，各包避免反向依赖具体应用。契约和客户端可共享的 schema 保持浏览器可用；认证实例、数据库和服务端环境变量留在服务端。
+- 应用通过 `@org-saas/*` 的公开 exports 使用共享包；包不反向依赖具体应用。
+- 契约和浏览器可共享的 schema 保持浏览器可用；认证实例、数据库和服务端环境变量留在服务端。
+- HTTP／页面入口不堆积业务：协议接入在应用路由，业务在 `packages/api`，认证在 `packages/auth`。
+- API 契约与实现分开：`src/contracts/` 定义输入、输出与预期错误，`src/routers/` 实现业务；新增自定义业务先契约再 router。
 
-API 契约与实现分开：`src/contracts/` 定义输入、输出与预期错误，`src/routers/` 实现业务，`src/index.ts` 集中公共 implementer、中间件、限流和日志。新增自定义业务先定义契约，再实现 router，具体规则见 API 约定。
+## Seams
+
+**Session**（`packages/auth`）：请求级会话只经 `createSessionGetter`／按需 `getSession`；浏览器不解析 Cookie 替代 Better Auth。  
+_Adapters_：HTTP headers（oRPC／Auth 入口）、Server Function middleware 注入的 getter。
+
+**Auth HTTP**（Better Auth handler）：登录、会话、组织插件标准端点只经 `/api/auth`；页面不绕过 handler 直接改会话表。  
+_Adapters_：浏览器 `authClient`，服务端 `auth.api.*`／`auth.handler`。
+
+**Business RPC**（`packages/api`）：多端共用业务只经 oRPC／OpenAPI 同一 router；不把多端业务写成 Web 专属 Server Function。  
+_Adapters_：浏览器 HTTP 客户端，SSR `createRouterClient`。
+
+**Database**（`packages/db`）：持久化只经 Drizzle 与 schema；认证模型与插件配置一致。  
+_Adapters_：应用／测试注入的 `DATABASE_URL`（开发、隔离测试库、e2e 临时库）。
+
+**Env**（`packages/env`）：进程环境经 Zod 校验入口读取；业务代码不散落 `process.env` 直读未校验键。  
+_Adapters_：`@org-saas/env/server`，`@org-saas/env/web`。
 
 ## Web 内部组织
 

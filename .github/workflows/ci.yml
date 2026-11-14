@@ -28,6 +28,29 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: org_saas_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d org_saas_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://postgres@127.0.0.1:5432/org_saas_ci
+      PERMISSION_TEST_DATABASE_URL: postgres://postgres@127.0.0.1:5432/org_saas_ci
+      DATABASE_ENV_FILE: /dev/null
+      DOTENV_CONFIG_PATH: /dev/null
+      BETTER_AUTH_SECRET: ci-test-secret-value-that-is-never-used-in-prod
+      BETTER_AUTH_URL: http://localhost:3000
+      CORS_ORIGIN: http://localhost:3000
+      LOG_LEVEL: warn
+      NODE_ENV: test
     steps:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
@@ -35,5 +58,10 @@ jobs:
           bun-version: latest
       - name: Install
         run: bun install --frozen-lockfile
+      - name: Apply schema
+        run: bun run db:push
       - name: Test
         run: bun run test
+
+  # Playwright e2e（自起临时 Postgres）不在默认 CI：耗时长、需 Docker 嵌套／镜像缓存。
+  # 本地或单独 workflow：bun run test:e2e
