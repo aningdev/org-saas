@@ -1,82 +1,53 @@
-## Agent skills
+## What this is
 
-### Issue tracker
+多组织 SaaS Monorepo（Bun Workspaces）。主站 Solid 2 + TanStack Start；文档站 React / Fumadocs。架构与词汇见 `docs/`，本文件只写 agent 在本仓怎么工作。
 
-Issues and specs live in GitHub Issues for `zhuxining/org-saas`, managed with `gh`. See `docs/agents/issue-tracker.md`.
+## Commands
 
-### Triage labels
+从仓库根执行：
 
-Use the five canonical labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, and `wontfix`. See `docs/agents/triage-labels.md`.
+| 命令                                       | 作用                                                                  |
+| ------------------------------------------ | --------------------------------------------------------------------- |
+| `bun run check`                            | 根目录 Layout 校验 + 格式／lint／类型（只读）                         |
+| `bun run fix`                              | 自动修复格式与 lint                                                   |
+| `bun run test`                             | `tests/` 下服务端／工具行为测试（含 Postgres 用例，需库或由 CI 提供） |
+| `bun run test:e2e`                         | Playwright 关键流程（自起临时 Postgres + 预览服务）                   |
+| `bun run dev:web` / `bun run dev:fumadocs` | 本地开发                                                              |
+| `bun run prepare`                          | 安装 Vite+ Git hook dispatcher（`vp config --no-agent`）              |
 
-### Domain docs
+数据库脚本见根 `package.json` 的 `db:*`；细节以 [DB 约定](packages/db/AGENTS.md)为准。
 
-Use the multi-context glossary map at `GLOSSARY-MAP.md` and system-wide ADRs in `docs/adr/`. See `docs/agents/domain.md`.
+## Working here
 
-## 项目与边界
+- **Issues / specs**：GitHub Issues，用 `gh`；仓库以当前 clone 的 `git remote` 为准（本仓为 `aningdev/org-saas`）。见 [issue-tracker](docs/agents/issue-tracker.md)。
+- **Triage labels**：`needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`、`wontfix`。见 [triage-labels](docs/agents/triage-labels.md)。
+- **语言**：回复与文档用简体中文；提交用 Conventional Commits（`feat:` / `fix:` / `refactor:` 等）。
+- **暂存钩子**：`.vite-hooks/pre-commit` 跑 `vp staged`（配置在根 `vite.config.ts`）。新 clone 经 `bun install` → `prepare`（`vp config --no-agent`）安装 dispatcher；本机可用 `vp hooks enable` / `vp hooks status`。若 `core.hooksPath` 已被其他工具占用，`vp config` 会跳过，需在本机自行衔接或改回后再 enable。
+- **领域文档入口**：[domain](docs/agents/domain.md)、[GLOSSARY-MAP.md](GLOSSARY-MAP.md)、系统级 ADR 在 [docs/adr/](docs/adr/)。
 
-多组织 SaaS Monorepo，使用 Bun Workspaces。主站采用 TanStack Start / Router、Solid 2.0 RC、oRPC、Better Auth 和 Drizzle / PostgreSQL；主站 UI 使用 `@ui-sdk/solid`（封装见 `apps/web/src/ui/`）。文档站仍为 React / Fumadocs。
+## Constraints
 
-- `apps/web`：公开页面、认证流程、个人中心和组织业务页面（Solid 2 + TanStack Start）。
-- `apps/fumadocs`：独立文档应用，使用 Fumadocs（React）。
-- `apps/mini`：微信小程序，使用 TDesign、WXML 和 WXSS。
-- `packages/api`、`auth`、`db`：共享业务 API、认证、数据访问。
-- `packages/env`：环境变量校验。共享 TypeScript 配置在根目录 `tsconfig.base.json` / `tsconfig.package.json`。
+- 改某应用／包前，先读该目录 `AGENTS.md`（见下表）。
+- 主站 UI 用 `@ui-sdk/solid`（封装在 `apps/web/src/ui/`）。有 `ui-sdk` skill 时先遵循；再读 `node_modules/@ui-sdk/solid/docs/llms.txt`，构建新组件时检索同目录 `core.md` / `rendering.md`。
+- 业务 RPC 契约优先（oRPC + Zod），实现在 `@org-saas/api`；认证用 Better Auth；数据用 Drizzle。HTTP 入口只做协议接入，不写业务逻辑。
+- 跨包只经 `@org-saas/*` 公开 exports；不引用其他包内部文件。
+- 不放宽 TypeScript、不用 `any` 或 lint ignore／disable 规避问题；误报需说明证据。
+- 自动化测试只覆盖明确业务风险或已知缺陷；文件一律放根 `tests/`。改测试前读 [测试规范](docs/agents/testing.md)。
+- 破坏性／架构／新依赖／持久化数据变更：先确认方案；已授权不重复问。改动只覆盖任务需要的内容。
 
-本文件适用于整个仓库。子目录文件补充局部约定。
+| 任务                          | 必读                                               |
+| ----------------------------- | -------------------------------------------------- |
+| 主站页面、路由、SSR、数据交互 | [apps/web/AGENTS.md](apps/web/AGENTS.md)           |
+| 业务 RPC、服务端校验和错误    | [packages/api/AGENTS.md](packages/api/AGENTS.md)   |
+| 认证、会话、组织插件和权限    | [packages/auth/AGENTS.md](packages/auth/AGENTS.md) |
+| 数据模型、关系和库变更        | [packages/db/AGENTS.md](packages/db/AGENTS.md)     |
+| 文档站                        | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md) |
+| 微信小程序                    | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)         |
 
-### ui-sdk
-
-使用 ui-sdk 前，若已安装 `ui-sdk` skill 则先遵循该 skill，并阅读 `node_modules/@ui-sdk/solid/docs/llms.txt`。要构建新组件时，再按标题检索 `node_modules/@ui-sdk/solid/docs/core.md`，并阅读同目录下的 `rendering.md`。
-
-## 按任务读取
-
-开始修改前，读取涉及目录的 `AGENTS.md`；跨包任务组合读取相关文件。
-
-| 任务                           | 必读文件                                                 |
-| ------------------------------ | -------------------------------------------------------- |
-| 主站页面、路由、SSR、数据交互  | [apps/web/AGENTS.md](apps/web/AGENTS.md)                 |
-| 业务 RPC、服务端校验和错误处理 | [packages/api/AGENTS.md](packages/api/AGENTS.md)         |
-| 认证、会话、组织插件和权限配置 | [packages/auth/AGENTS.md](packages/auth/AGENTS.md)       |
-| 数据模型、关系和数据库变更     | [packages/db/AGENTS.md](packages/db/AGENTS.md)           |
-| 主站 UI（ui-sdk 封装）         | [apps/web/AGENTS.md](apps/web/AGENTS.md)（见 ui-sdk 节） |
-| 文档内容、文档路由和搜索       | [apps/fumadocs/AGENTS.md](apps/fumadocs/AGENTS.md)       |
-| 微信小程序页面、组件和样式     | [apps/mini/AGENTS.md](apps/mini/AGENTS.md)               |
-
-框架细节按任务读取已提供的技能：主站路由 / Start 用 Solid 版 TanStack；查询用 `@tanstack/solid-query`；组件用 `ui-sdk` skill 与 `@ui-sdk/solid` 文档；认证用对应 Better Auth 技能。文档站仍按 React / Fumadocs 技能。技能不可用时查官方文档，不依赖未提供的技能名称。
-
-## 跨包约定
-
-- 业务 RPC 使用 oRPC，遵循契约优先，具体要求见 [API 约定](packages/api/AGENTS.md)；认证和组织插件接口使用 Better Auth；数据库访问使用 Drizzle。HTTP 入口仅承担协议接入，不承载业务逻辑。
-- 外部输入在对应服务端入口校验，业务 RPC 使用 Zod；页面校验用于反馈，不能替代服务端校验。
-- 跨包通过 `@org-saas/*` 的公开 exports 导入；应用内别名以本应用配置为准，不直接引用其他包的内部文件。
-- 保持现有 TypeScript 严格检查，不通过放宽配置、`any` 或 lint ignore / disable 注释规避问题。误报需说明证据后讨论处理方式。
-- 保留生成文件的生成流程；具体编辑边界见对应子目录约定。
-- 格式、导入排序和 lint 以根 `vite.config.ts` 为准；编译选项以共享及各包 `tsconfig` 为准，不在文档中复制配置清单。
-- 提交使用 Conventional Commits，例如 `feat:`、`fix:`、`refactor:`；暂存检查配置见根 `vite.config.ts`。
-
-## 工作流程与决策边界
-
-- 目标明确且处于已授权范围的常规改动，说明计划后直接推进。澄清会改变结果的歧义，并给出选项与影响。
-- 架构方向、依赖引入或升级、破坏性操作及影响持久化数据的操作，执行前确认具体方案；已有授权不重复确认，出现新的实质性取舍再讨论。
-- 新依赖说明必要性、体积、维护状态和许可证；复用现有能力优先。
-- 改动只覆盖任务需要的内容；清理本次改动产生的孤儿导入和变量，无关问题记录并告知，不顺手扩大范围。
-- 注释解释不明显的设计原因。说明和交付先给结论，再给改动、影响和验证结果。
-
-## 验证与交付
-
-命令从仓库根执行；完整脚本以根及目标包 `package.json` 为准。
-
-- 主站开发：`bun run dev:web`；文档开发：`bun run dev:fumadocs`。
-- `bun run check`：格式、lint、类型检查（只读，不改写）。
-- `bun run fix`：自动修复格式与 lint。
-- `bun run test`：根 `tests/` 下的服务端／工具行为测试（`vp test`）。
-- 自动化测试仅验证明确业务风险或复现已知缺陷，不按单元、接口等类型补齐测试，不为覆盖率或数量凑用例。所有测试及辅助文件集中在根 `tests/`；新增、修改、迁移或删除测试以及调整测试配置前，必读 [测试规范](docs/agents/testing.md)。
-
-- 涉及构建、SSR 或生成流程的改动，运行目标应用的构建或对应生成检查；数据库操作遵循 DB 文件的确认边界。
-- 交付说明实际改动、已执行检查及未完成项。检查失败时区分本次引入的问题与既有问题，不将未执行的检查报告为通过。
+框架细节用已安装技能（TanStack Solid、ui-sdk、Better Auth 等）；不可用时查官方文档。
 
 ## Where to read
 
-- 领域词汇：[docs/GLOSSARY.md](docs/GLOSSARY.md)（指向 `docs/architecture/GLOSSARY.md`）
-- 架构约定：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)（指向 `docs/architecture/`）
+- 领域词汇：[docs/GLOSSARY.md](docs/GLOSSARY.md)
+- 架构约定：[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)（Stack / Layout / Layers / Seams 见 [代码组织](docs/architecture/code-organization.md)）
 - 决策记录：[docs/adr/](docs/adr/)

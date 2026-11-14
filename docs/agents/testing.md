@@ -29,7 +29,9 @@
 
 从仓库根使用 `vp test` 运行服务端与工具行为测试，按需指定 `tests/` 内的文件或业务目录；Playwright 浏览器测试使用下方独立入口。新增用例不要求运行所有无关测试；迁移或调整测试配置后，应检查全部测试文件的发现与执行结果。
 
-依赖 PostgreSQL 的现有用例通过 `PERMISSION_TEST_DATABASE_URL` 连接已确认的隔离测试库；未设置时跳过，不能将跳过报告为通过。测试库需具备当前 schema，数据库初始化、清理或变更遵循 [DB 约定](../../packages/db/AGENTS.md)，不得使用开发、预发或生产业务数据代替测试数据。
+依赖 PostgreSQL 的现有用例通过 `PERMISSION_TEST_DATABASE_URL` 连接已确认的隔离测试库；未设置时跳过，不能将跳过报告为通过。测试库需具备当前 schema，数据库初始化、清理或变更遵循 [DB 约定](../../packages/db/AGENTS.md)，不得使用开发、预发或生产业务数据代替测试库。
+
+**CI**：`.github/workflows/ci.yml` 的 `test` job 提供隔离 Postgres 17、设置 `PERMISSION_TEST_DATABASE_URL`／`DATABASE_URL`、执行 `db:push` 后跑 `bun run test`，因此权限相关 `*.postgres.test.ts` 在 CI 中必须真正执行，不能依赖 skip。Playwright `test:e2e` 不在默认 CI（自起容器与构建成本更高）；需要时本地或单独 workflow 运行。
 
 ## 浏览器功能验证
 

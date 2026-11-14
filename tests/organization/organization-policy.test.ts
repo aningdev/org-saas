@@ -1,3 +1,4 @@
+import { auditSchemaPlugin } from "@org-saas/auth/audit-schema";
 import { createOrganizationPolicyPlugin, hasSingleRole } from "@org-saas/auth/organization-policy";
 import { withOrganizationMutationTransactions } from "@org-saas/auth/organization-transaction";
 import { ac, roles } from "@org-saas/auth/permissions";
@@ -34,25 +35,6 @@ const organizationOptions = {
   dynamicAccessControl: { enabled: true },
   roles,
 } as const satisfies OrganizationOptions;
-
-const auditSchemaPlugin = {
-  id: "test-audit-schema",
-  schema: {
-    auditLog: {
-      fields: {
-        scope: { type: "string" },
-        organizationId: { type: "string", required: false },
-        actorId: { type: "string" },
-        actorName: { type: "string" },
-        action: { type: "string" },
-        targetType: { type: "string" },
-        targetId: { type: "string", required: false },
-        summary: { type: "json" },
-        occurredAt: { type: "date", defaultValue: () => new Date() },
-      },
-    },
-  },
-} as const;
 
 function createTestAuth() {
   const memoryDb: Parameters<typeof memoryAdapter>[0] = {

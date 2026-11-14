@@ -1,4 +1,5 @@
 import { runWithTransaction } from "@better-auth/core/context";
+import { auditSchemaPlugin } from "@org-saas/auth/audit-schema";
 import { createOrganizationPolicyPlugin } from "@org-saas/auth/organization-policy";
 import { withOrganizationMutationTransactions } from "@org-saas/auth/organization-transaction";
 import { ac, roles } from "@org-saas/auth/permissions";
@@ -81,6 +82,7 @@ function createTestAuth(database: Parameters<typeof drizzleAdapter>[0], failTran
         adminRoles: ["platform-admin"],
       }),
       organization(organizationOptions),
+      auditSchemaPlugin,
       createOrganizationPolicyPlugin(organizationOptions, ["platform-admin"]),
       ...(failTransfers ? [failurePlugin] : []),
     ],

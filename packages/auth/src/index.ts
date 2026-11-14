@@ -8,6 +8,7 @@ import { admin } from "better-auth/plugins/admin";
 import { organization } from "better-auth/plugins/organization";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 
+import { auditSchemaPlugin } from "./audit-schema";
 import { createOrganizationPolicyPlugin } from "./organization-policy";
 import { withOrganizationMutationTransactions } from "./organization-transaction";
 import { ac, roles } from "./permissions";
@@ -76,6 +77,7 @@ const authInstance = betterAuth({
     }),
     openAPI(), // `http://localhost:3001/api/auth/reference`
     organization(organizationOptions),
+    auditSchemaPlugin,
     createOrganizationPolicyPlugin(organizationOptions, platformAdminRoles),
     tanstackStartCookies(),
   ],
