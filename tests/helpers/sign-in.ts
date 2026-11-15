@@ -6,23 +6,36 @@ import { expect } from "../fixtures/browser";
 
 type Credentials = { email: string; password: string };
 
-let lastSignInCompletedAt = 0;
-const authenticationWindowMs = 10_000;
+/** Matches packages/auth `rateLimit.customRules["/sign-in/email"]`. */
+const signInWindowMs = 60_000;
+const signInMaxPerWindow = 5;
+const signInCompletedAt: number[] = [];
+
+async function waitForSignInRateLimitSlot() {
+  // Shared IP bucket across serial Chromium workers in one e2e run.
+  for (;;) {
+    const now = Date.now();
+    while (signInCompletedAt.length > 0 && now - signInCompletedAt[0]! >= signInWindowMs) {
+      signInCompletedAt.shift();
+    }
+    if (signInCompletedAt.length < signInMaxPerWindow) return;
+    const oldest = signInCompletedAt[0];
+    if (oldest === undefined) return;
+    await setTimeout(signInWindowMs - (now - oldest) + 50);
+  }
+}
 
 export async function submitSignIn(page: Page, credentials: Credentials) {
   await page.getByRole("button", { name: "Already have an account? Sign In" }).click();
   await page.getByLabel("Email", { exact: true }).fill(credentials.email);
   await page.getByLabel("Password", { exact: true }).fill(credentials.password);
-  // Better Auth sign-in custom rule: 5 requests / 60s (database storage).
-  // All local browsers share one IP bucket; keep a short gap without retrying failures.
-  const remaining = lastSignInCompletedAt + authenticationWindowMs - Date.now();
-  if (remaining > 0) await setTimeout(remaining);
+  await waitForSignInRateLimitSlot();
   const responsePromise = page.waitForResponse(
     (response) => new URL(response.url()).pathname === "/api/auth/sign-in/email",
   );
   await page.getByRole("button", { name: "Sign In", exact: true }).click();
   const response = await responsePromise;
-  lastSignInCompletedAt = Date.now();
+  signInCompletedAt.push(Date.now());
   expect(response.status(), "Signing in through the real application must succeed").toBe(200);
 }
 

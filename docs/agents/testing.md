@@ -58,6 +58,6 @@ bun run --cwd tests playwright show-report
 
 首批浏览器场景覆盖登录回跳与退出后的访问阻断、创建组织并邀请新账号加入、两个标签页的组织数据与写入隔离、退出换账号后的缓存与访问隔离，以及 owner 归档／恢复组织。
 
-浏览器运行配置位于 `tests/playwright.config.ts`，仅使用 Chromium，串行执行，重试次数为 0。本地预览的认证请求共享 IP 限流桶（Better Auth `rateLimit.storage: "database"`）：准备账号使用服务端 API，浏览器登录在提交间保留间隔，不关闭限流或重试失败的登录。失败保留截图与 trace，HTML 报告输出到 `tests/playwright-report/`，附件输出到 `tests/test-results/`；这些目录不提交，报告仅在本地查看；浏览器测试由开发者按需执行，不配置 GitHub Actions。
+浏览器运行配置位于 `tests/playwright.config.ts`，仅使用 Chromium，串行执行，重试次数为 0。本地预览的认证请求共享 IP 限流桶（Better Auth `rateLimit.storage: "database"`，登录自定义规则 5 次／60 秒）：准备账号使用服务端 API；`tests/helpers/sign-in.ts` 按滑动窗口等待空位后再提交，不关闭限流或重试失败的登录。失败保留截图与 trace，HTML 报告输出到 `tests/playwright-report/`，附件输出到 `tests/test-results/`；这些目录不提交，报告仅在本地查看；浏览器测试由开发者按需执行，不配置 GitHub Actions。
 
 交付记录实际执行的检查、通过与跳过数量，以及尚未验证的业务风险。修改现有测试时核对其业务目的；仅在风险消失、已有等价覆盖或测试不符合准入标准时删除，并说明依据。
