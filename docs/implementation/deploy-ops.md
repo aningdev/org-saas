@@ -16,7 +16,7 @@
 | `PLATFORM_ADMIN_BOOTSTRAP_*` | 仅 bootstrap | 见下一节                                              |
 | `LOG_LEVEL` / `NODE_ENV`     | 否           | 默认值见 `packages/env`                               |
 
-Auth 限流使用 Better Auth **database** 存储（`rateLimit` 表），与 oRPC 进程内 `MemoryRateLimiter` 无关；多实例共享计数依赖 schema 已应用到该库。
+Auth 限流在 **production** 由 Better Auth 默认开启，使用 **database** 存储（`rateLimit` 表），与 oRPC 进程内 `MemoryRateLimiter` 无关；多实例共享计数依赖 schema 已应用到该库。`NODE_ENV=test`／本地开发默认不启用以避免套件 HTTP 注册被 429。
 
 ## 2. Schema 与存量盘点（人工门禁）
 

@@ -76,10 +76,10 @@ const authInstance = betterAuth({
       });
     },
   },
-  // Database storage so multi-instance / serverless deploys share counters.
-  // Distinct from oRPC `MemoryRateLimiter` on business RPC.
+  // Enabled in production by Better Auth default; database storage so
+  // multi-instance deploys share counters. Distinct from oRPC MemoryRateLimiter.
+  // Do not force enabled in test/dev — HTTP sign-up suites would 429.
   rateLimit: {
-    enabled: true,
     storage: "database",
     window: 10,
     max: 100,
