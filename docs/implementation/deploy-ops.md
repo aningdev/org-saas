@@ -4,17 +4,17 @@
 
 ## 1. 环境变量
 
-| 变量                         | 必需         | 说明                                                  |
-| ---------------------------- | ------------ | ----------------------------------------------------- |
-| `DATABASE_URL`               | 是           | `postgres://` 或 `postgresql://`                      |
-| `BETTER_AUTH_SECRET`         | 是           | ≥32 字符；各环境独立                                  |
-| `BETTER_AUTH_URL`            | 是           | 对外可达的应用根 URL（含协议）                        |
-| `CORS_ORIGIN`                | 是           | 可信前端 Origin，与 Auth `trustedOrigins` 一致        |
-| `RESEND_API_KEY`             | 邮件流       | 配置后才真正发信                                      |
-| `EMAIL_FROM`                 | 邮件流       | 已验证发件地址，如 `Org SaaS <noreply@example.com>`   |
-| `REQUIRE_EMAIL_VERIFICATION` | 否           | `true` 时且邮件已配置，才拦截未验证邮箱登录；默认关闭 |
-| `AUTH_TRUSTED_PROXIES`       | 反代后       | 逗号分隔可信代理 IP／CIDR，用于解析真实客户端 IP      |
-| `PLATFORM_ADMIN_BOOTSTRAP_*` | 仅 bootstrap | 见下一节                                              |
+| 变量                         | 必需         | 说明                                                     |
+| ---------------------------- | ------------ | -------------------------------------------------------- |
+| `DATABASE_URL`               | 是           | `postgres://` 或 `postgresql://`                         |
+| `BETTER_AUTH_SECRET`         | 是           | ≥32 字符；各环境独立                                     |
+| `BETTER_AUTH_URL`            | 是           | 对外可达的应用根 URL（含协议）                           |
+| `CORS_ORIGIN`                | 是           | 可信前端 Origin，与 Auth `trustedOrigins` 一致           |
+| `RESEND_API_KEY`             | 邮件流       | 配置后才真正发信                                         |
+| `EMAIL_FROM`                 | 邮件流       | 已验证发件地址，如 `Org SaaS <noreply@example.com>`      |
+| `REQUIRE_EMAIL_VERIFICATION` | 否           | `true` 时且邮件已配置，才拦截未验证邮箱登录；默认关闭    |
+| `AUTH_TRUSTED_PROXIES`       | 反代后       | 逗号分隔可信代理 IP／CIDR，用于解析真实客户端 IP         |
+| `PLATFORM_ADMIN_BOOTSTRAP_*` | 仅 bootstrap | 见下一节                                                 |
 | `LOG_LEVEL` / `NODE_ENV`     | 否           | 默认值见 `packages/env`；对外部署用 `production`／`prod` |
 
 Auth 限流在 `NODE_ENV !== "test"` 时显式开启，使用 **database** 存储（`rateLimit` 表），与 oRPC 进程内 `MemoryRateLimiter` 无关。`advanced.ipAddress` 读取 `x-forwarded-for`／`x-real-ip`／`cf-connecting-ip`；解析不到客户端 IP 时 Better Auth **不会跳过**限流，而是落到共享 per-path 桶。反向代理后务必配置 `AUTH_TRUSTED_PROXIES`，否则多跳 XFF 不会被采信。IP 轮换仍可绕过按 IP 分桶；邮件滥发需另配 CAPTCHA／供应商限额。
