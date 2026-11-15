@@ -4,10 +4,13 @@ import { defaultStatements } from "better-auth/plugins/organization/access";
 const statements = {
   ...defaultStatements,
   audit: ["read"],
+  task: ["create", "read", "update", "delete"],
 } as const;
 const ac = createAccessControl(statements);
 
-const member = ac.newRole({});
+const member = ac.newRole({
+  task: ["create", "read", "update"],
+});
 
 const admin = ac.newRole({
   organization: ["update"],
@@ -15,6 +18,7 @@ const admin = ac.newRole({
   member: ["create", "update", "delete"],
   team: ["create", "update", "delete"],
   audit: ["read"],
+  task: ["create", "read", "update", "delete"],
 });
 
 const owner = ac.newRole({
@@ -24,6 +28,7 @@ const owner = ac.newRole({
   team: ["create", "update", "delete"],
   ac: ["create", "read", "update", "delete"],
   audit: ["read"],
+  task: ["create", "read", "update", "delete"],
 });
 
 export { ac };

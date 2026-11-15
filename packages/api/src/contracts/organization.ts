@@ -49,6 +49,12 @@ const effectiveOperationsSchema = z.object({
     delete: z.boolean(),
   }),
   audit: z.object({ read: z.boolean() }),
+  task: z.object({
+    create: z.boolean(),
+    read: z.boolean(),
+    update: z.boolean(),
+    delete: z.boolean(),
+  }),
 });
 
 const organizationAccessOutput = z.object({

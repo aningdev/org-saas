@@ -149,7 +149,7 @@ apps/web/src/
 | 组织角色   | `_authenticated/org/$orgSlug/_active/roles`          | 组织动态角色页面，按角色定义操作权限检查                              |
 | HTTP 接入  | `api/auth.$`、`api/rpc.$`                            | 认证和业务协议入口独立保留                                            |
 
-公开、认证及个人页面已迁移至对应分区；组织外层按明确 slug 提供成员和状态上下文，`_active` 承载概览、成员、团队、设置和角色页面，`archived` 是独立恢复分支。平台 `admin` 与组织角色布局及权限守卫已实施。收藏与资源详情仍未实现；路由迁移状态和验证见 [Web 路由重构实施计划](../implementation/web-routing.md)及 GitHub issues #8–#10。
+公开、认证及个人页面已迁移至对应分区；组织外层按明确 slug 提供成员和状态上下文，`_active` 承载概览、成员、团队、任务、设置和角色页面，`archived` 是独立恢复分支。平台 `admin` 与组织角色布局及权限守卫已实施。收藏入口仍未实现；路由迁移状态和验证见 [Web 路由重构实施计划](../implementation/web-routing.md)及 GitHub issues #8–#10。
 
 ### 已确认的目标路由结构
 

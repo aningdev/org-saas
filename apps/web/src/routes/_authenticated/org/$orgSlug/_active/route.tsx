@@ -42,6 +42,7 @@ function ActiveOrganizationLayout() {
   const canArchive = usePermission({ organization: ["archive"] });
   const canReadRoles = usePermission({ ac: ["read"] });
   const canReadAudit = usePermission({ audit: ["read"] });
+  const canReadTasks = usePermission({ task: ["read"] });
 
   const navItems = () => {
     const items = [
@@ -49,6 +50,9 @@ function ActiveOrganizationLayout() {
       { to: `/org/${orgCtx.org.slug}/members`, label: "成员", exact: false },
       { to: `/org/${orgCtx.org.slug}/teams`, label: "团队", exact: false },
     ];
+    if (canReadTasks) {
+      items.push({ to: `/org/${orgCtx.org.slug}/tasks`, label: "任务", exact: false });
+    }
     if (canReadRoles) {
       items.push({ to: `/org/${orgCtx.org.slug}/roles`, label: "角色", exact: false });
     }

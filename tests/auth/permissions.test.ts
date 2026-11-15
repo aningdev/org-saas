@@ -11,9 +11,17 @@ describe("organization role permissions", () => {
     expect(roles.member.authorize({ ac: ["create", "update", "delete"] }).success).toBe(false);
   });
 
+  it("lets members create, read, and update organization tasks but not delete them", () => {
+    expect(roles.member.authorize({ task: ["create", "read", "update"] }).success).toBe(true);
+    expect(roles.member.authorize({ task: ["delete"] }).success).toBe(false);
+  });
+
   it("keeps dynamic role definition writes away from organization admins", () => {
     expect(roles.admin.authorize({ ac: ["create", "update", "delete"] }).success).toBe(false);
     expect(roles.admin.authorize({ member: ["create", "update", "delete"] }).success).toBe(true);
+    expect(roles.admin.authorize({ task: ["create", "read", "update", "delete"] }).success).toBe(
+      true,
+    );
   });
 
   it("limits owners to approved organization management permissions", () => {
@@ -22,6 +30,9 @@ describe("organization role permissions", () => {
     expect(roles.owner.authorize({ invitation: ["create", "cancel"] }).success).toBe(true);
     expect(roles.owner.authorize({ team: ["create", "update", "delete"] }).success).toBe(true);
     expect(roles.owner.authorize({ ac: ["create", "read", "update", "delete"] }).success).toBe(
+      true,
+    );
+    expect(roles.owner.authorize({ task: ["create", "read", "update", "delete"] }).success).toBe(
       true,
     );
     expect(roles.owner.authorize({ organization: ["delete"] }).success).toBe(false);
