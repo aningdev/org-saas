@@ -112,7 +112,7 @@ export const organizationRouter = {
         ...Object.entries(roles).map(([name, role]) => ({
           name,
           custom: false,
-          statements: role.statements as Record<string, string[]>,
+          statements: role.statements as unknown as Record<string, string[]>,
         })),
         ...customRoles.map(({ role, permission }) => ({
           name: role,

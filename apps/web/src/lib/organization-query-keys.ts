@@ -8,6 +8,8 @@ export const organizationQueryKeys = {
     ["organization", userId, organizationId, "full"] as const,
   dashboardStats: (userId: string, organizationId: string) =>
     ["organization", userId, organizationId, "dashboard-stats"] as const,
+  tasks: (userId: string, organizationId: string) =>
+    ["organization", userId, organizationId, "tasks"] as const,
   roles: (userId: string, organizationId: string) =>
     ["organization", userId, organizationId, "roles"] as const,
   grantableRoles: (userId: string, organizationId: string, operation: string) =>

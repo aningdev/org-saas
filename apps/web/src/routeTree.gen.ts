@@ -43,6 +43,7 @@ import { Route as AuthenticatedOrgOrgSlugActiveAuditIndexRouteImport } from './r
 import { Route as AuthenticatedOrgOrgSlugActiveMembersIndexRouteImport } from './routes/_authenticated/org/$orgSlug/_active/members/index'
 import { Route as AuthenticatedOrgOrgSlugActiveRolesIndexRouteImport } from './routes/_authenticated/org/$orgSlug/_active/roles/index'
 import { Route as AuthenticatedOrgOrgSlugActiveSettingsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/_active/settings/index'
+import { Route as AuthenticatedOrgOrgSlugActiveTasksIndexRouteImport } from './routes/_authenticated/org/$orgSlug/_active/tasks/index'
 import { Route as AuthenticatedOrgOrgSlugActiveTeamsIndexRouteImport } from './routes/_authenticated/org/$orgSlug/_active/teams/index'
 import { Route as AuthenticatedOrgOrgSlugActiveTeamsTeamIdRouteImport } from './routes/_authenticated/org/$orgSlug/_active/teams/$teamId'
 
@@ -230,6 +231,12 @@ const AuthenticatedOrgOrgSlugActiveSettingsIndexRoute =
     path: '/settings/',
     getParentRoute: () => AuthenticatedOrgOrgSlugActiveRouteRoute,
   } as any)
+const AuthenticatedOrgOrgSlugActiveTasksIndexRoute =
+  AuthenticatedOrgOrgSlugActiveTasksIndexRouteImport.update({
+    id: '/tasks/',
+    path: '/tasks/',
+    getParentRoute: () => AuthenticatedOrgOrgSlugActiveRouteRoute,
+  } as any)
 const AuthenticatedOrgOrgSlugActiveTeamsIndexRoute =
   AuthenticatedOrgOrgSlugActiveTeamsIndexRouteImport.update({
     id: '/teams/',
@@ -275,6 +282,7 @@ export interface FileRoutesByFullPath {
   '/org/$orgSlug/members/': typeof AuthenticatedOrgOrgSlugActiveMembersIndexRoute
   '/org/$orgSlug/roles/': typeof AuthenticatedOrgOrgSlugActiveRolesIndexRoute
   '/org/$orgSlug/settings/': typeof AuthenticatedOrgOrgSlugActiveSettingsIndexRoute
+  '/org/$orgSlug/tasks/': typeof AuthenticatedOrgOrgSlugActiveTasksIndexRoute
   '/org/$orgSlug/teams/': typeof AuthenticatedOrgOrgSlugActiveTeamsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -306,6 +314,7 @@ export interface FileRoutesByTo {
   '/org/$orgSlug/members': typeof AuthenticatedOrgOrgSlugActiveMembersIndexRoute
   '/org/$orgSlug/roles': typeof AuthenticatedOrgOrgSlugActiveRolesIndexRoute
   '/org/$orgSlug/settings': typeof AuthenticatedOrgOrgSlugActiveSettingsIndexRoute
+  '/org/$orgSlug/tasks': typeof AuthenticatedOrgOrgSlugActiveTasksIndexRoute
   '/org/$orgSlug/teams': typeof AuthenticatedOrgOrgSlugActiveTeamsIndexRoute
 }
 export interface FileRoutesById {
@@ -345,6 +354,7 @@ export interface FileRoutesById {
   '/_authenticated/org/$orgSlug/_active/members/': typeof AuthenticatedOrgOrgSlugActiveMembersIndexRoute
   '/_authenticated/org/$orgSlug/_active/roles/': typeof AuthenticatedOrgOrgSlugActiveRolesIndexRoute
   '/_authenticated/org/$orgSlug/_active/settings/': typeof AuthenticatedOrgOrgSlugActiveSettingsIndexRoute
+  '/_authenticated/org/$orgSlug/_active/tasks/': typeof AuthenticatedOrgOrgSlugActiveTasksIndexRoute
   '/_authenticated/org/$orgSlug/_active/teams/': typeof AuthenticatedOrgOrgSlugActiveTeamsIndexRoute
 }
 export interface FileRouteTypes {
@@ -381,6 +391,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/members/'
     | '/org/$orgSlug/roles/'
     | '/org/$orgSlug/settings/'
+    | '/org/$orgSlug/tasks/'
     | '/org/$orgSlug/teams/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -412,6 +423,7 @@ export interface FileRouteTypes {
     | '/org/$orgSlug/members'
     | '/org/$orgSlug/roles'
     | '/org/$orgSlug/settings'
+    | '/org/$orgSlug/tasks'
     | '/org/$orgSlug/teams'
   id:
     | '__root__'
@@ -450,6 +462,7 @@ export interface FileRouteTypes {
     | '/_authenticated/org/$orgSlug/_active/members/'
     | '/_authenticated/org/$orgSlug/_active/roles/'
     | '/_authenticated/org/$orgSlug/_active/settings/'
+    | '/_authenticated/org/$orgSlug/_active/tasks/'
     | '/_authenticated/org/$orgSlug/_active/teams/'
   fileRoutesById: FileRoutesById
 }
@@ -702,6 +715,13 @@ declare module '@tanstack/solid-router' {
       preLoaderRoute: typeof AuthenticatedOrgOrgSlugActiveSettingsIndexRouteImport
       parentRoute: typeof AuthenticatedOrgOrgSlugActiveRouteRoute
     }
+    '/_authenticated/org/$orgSlug/_active/tasks/': {
+      id: '/_authenticated/org/$orgSlug/_active/tasks/'
+      path: '/tasks'
+      fullPath: '/org/$orgSlug/tasks/'
+      preLoaderRoute: typeof AuthenticatedOrgOrgSlugActiveTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedOrgOrgSlugActiveRouteRoute
+    }
     '/_authenticated/org/$orgSlug/_active/teams/': {
       id: '/_authenticated/org/$orgSlug/_active/teams/'
       path: '/teams'
@@ -799,6 +819,7 @@ interface AuthenticatedOrgOrgSlugActiveRouteRouteChildren {
   AuthenticatedOrgOrgSlugActiveMembersIndexRoute: typeof AuthenticatedOrgOrgSlugActiveMembersIndexRoute
   AuthenticatedOrgOrgSlugActiveRolesIndexRoute: typeof AuthenticatedOrgOrgSlugActiveRolesIndexRoute
   AuthenticatedOrgOrgSlugActiveSettingsIndexRoute: typeof AuthenticatedOrgOrgSlugActiveSettingsIndexRoute
+  AuthenticatedOrgOrgSlugActiveTasksIndexRoute: typeof AuthenticatedOrgOrgSlugActiveTasksIndexRoute
   AuthenticatedOrgOrgSlugActiveTeamsIndexRoute: typeof AuthenticatedOrgOrgSlugActiveTeamsIndexRoute
 }
 
@@ -816,6 +837,8 @@ const AuthenticatedOrgOrgSlugActiveRouteRouteChildren: AuthenticatedOrgOrgSlugAc
       AuthenticatedOrgOrgSlugActiveRolesIndexRoute,
     AuthenticatedOrgOrgSlugActiveSettingsIndexRoute:
       AuthenticatedOrgOrgSlugActiveSettingsIndexRoute,
+    AuthenticatedOrgOrgSlugActiveTasksIndexRoute:
+      AuthenticatedOrgOrgSlugActiveTasksIndexRoute,
     AuthenticatedOrgOrgSlugActiveTeamsIndexRoute:
       AuthenticatedOrgOrgSlugActiveTeamsIndexRoute,
   }

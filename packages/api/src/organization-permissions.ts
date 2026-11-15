@@ -29,7 +29,7 @@ function parsePermissionMap(value: unknown): Record<string, string[]> {
 
 export function getRoleStatements(role: string, customPermission?: unknown) {
   const staticStatements = Object.hasOwn(roles, role)
-    ? (roles[role as keyof typeof roles].statements as Record<string, string[]>)
+    ? (roles[role as keyof typeof roles].statements as unknown as Record<string, string[]>)
     : {};
   const dynamicStatements = parsePermissionMap(customPermission);
   const result = { ...staticStatements };

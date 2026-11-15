@@ -1,6 +1,9 @@
 import { defineRelations } from "drizzle-orm";
 
-import * as schema from "./auth";
+import * as auth from "./auth";
+import * as task from "./task";
+
+const schema = { ...auth, ...task };
 
 export const relations = defineRelations(schema, (helpers) => {
   const { one, many } = helpers;
@@ -15,6 +18,7 @@ export const relations = defineRelations(schema, (helpers) => {
     team,
     teamMember,
     auditLog,
+    organizationTask,
   } = helpers;
 
   return {
@@ -24,6 +28,10 @@ export const relations = defineRelations(schema, (helpers) => {
       memberships: many.member(),
       invitationsSent: many.invitation(),
       teamMemberships: many.teamMember(),
+      createdTasks: many.organizationTask({
+        from: user.id,
+        to: organizationTask.createdByUserId,
+      }),
     },
     session: {
       user: one.user({ from: session.userId, to: user.id }),
@@ -37,6 +45,7 @@ export const relations = defineRelations(schema, (helpers) => {
       roles: many.organizationRole(),
       teams: many.team(),
       auditLogs: many.auditLog(),
+      tasks: many.organizationTask(),
     },
     member: {
       user: one.user({ from: member.userId, to: user.id }),
@@ -75,6 +84,16 @@ export const relations = defineRelations(schema, (helpers) => {
     teamMember: {
       team: one.team({ from: teamMember.teamId, to: team.id }),
       user: one.user({ from: teamMember.userId, to: user.id }),
+    },
+    organizationTask: {
+      organization: one.organization({
+        from: organizationTask.organizationId,
+        to: organization.id,
+      }),
+      createdBy: one.user({
+        from: organizationTask.createdByUserId,
+        to: user.id,
+      }),
     },
   };
 });

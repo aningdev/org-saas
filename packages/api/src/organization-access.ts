@@ -23,6 +23,7 @@ function emptyOperations(): EffectiveOrganizationOperations {
     team: { create: false, update: false, delete: false },
     ac: { read: false, create: false, update: false, delete: false },
     audit: { read: false },
+    task: { create: false, read: false, update: false, delete: false },
   };
 }
 
@@ -62,6 +63,10 @@ async function resolveOperationsViaHasPermission(input: {
     acUpdate,
     acDelete,
     auditRead,
+    taskCreate,
+    taskRead,
+    taskUpdate,
+    taskDelete,
   ] = await Promise.all([
     check({ organization: ["update"] }),
     check({ member: ["create"] }),
@@ -77,6 +82,10 @@ async function resolveOperationsViaHasPermission(input: {
     check({ ac: ["update"] }),
     check({ ac: ["delete"] }),
     check({ audit: ["read"] }),
+    check({ task: ["create"] }),
+    check({ task: ["read"] }),
+    check({ task: ["update"] }),
+    check({ task: ["delete"] }),
   ]);
 
   return {
@@ -109,6 +118,12 @@ async function resolveOperationsViaHasPermission(input: {
       delete: acDelete,
     },
     audit: { read: auditRead },
+    task: {
+      create: taskCreate,
+      read: taskRead,
+      update: taskUpdate,
+      delete: taskDelete,
+    },
   };
 }
 

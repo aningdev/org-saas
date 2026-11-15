@@ -318,7 +318,12 @@ postgresDescribe("restricted organization and platform API", () => {
       body: {
         organizationId: organizationA.id,
         role: "member-role-manager",
-        permission: { member: ["update"], team: ["create"] },
+        // Must cover predefined member statements (including task) to remain able to grant `member`.
+        permission: {
+          member: ["update"],
+          team: ["create"],
+          task: ["create", "read", "update"],
+        },
       },
       headers: userA.headers,
     });

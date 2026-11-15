@@ -4,6 +4,7 @@ import { auditRouter } from "./audit";
 import { betterAuthOpenAPIDocsRouter } from "./better-auth-openapi-docs";
 import { dashboardRouter } from "./dashboard";
 import { organizationRouter, platformRouter } from "./organization";
+import { taskRouter } from "./task";
 import { userRouter } from "./user";
 
 const router = {
@@ -29,6 +30,7 @@ const router = {
   organization: organizationRouter,
   platform: platformRouter,
   audit: auditRouter,
+  task: taskRouter,
 };
 
 export const appRouter = publicImplementer.router(router);
