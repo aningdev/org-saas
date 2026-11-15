@@ -62,12 +62,17 @@ const authInstance = betterAuth({
   }),
   trustedOrigins: [env.CORS_ORIGIN],
   advanced: {
-    ipAddress: {
-      // Prefer platform/proxy headers; without a resolvable IP Better Auth still
-      // rate-limits via a shared per-path bucket (does not skip counting).
-      ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
-      ...(trustedProxies.length > 0 ? { trustedProxies } : {}),
-    },
+    // Only trust forwarded IP headers when AUTH_TRUSTED_PROXIES is set. Otherwise
+    // a client can send a single spoofed X-Forwarded-For / X-Real-IP and mint a
+    // fresh rate-limit bucket. With no headers, BA falls back to a shared
+    // per-path bucket (still counts; does not skip).
+    ipAddress:
+      trustedProxies.length > 0
+        ? {
+            ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
+            trustedProxies,
+          }
+        : { ipAddressHeaders: [] },
   },
   emailAndPassword: {
     enabled: true,
