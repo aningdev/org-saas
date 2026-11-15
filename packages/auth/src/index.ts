@@ -49,6 +49,11 @@ const organizationOptions = {
   roles,
 } as const;
 
+const trustedProxies = (env.AUTH_TRUSTED_PROXIES ?? "")
+  .split(",")
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+
 const authInstance = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -56,6 +61,14 @@ const authInstance = betterAuth({
     transaction: true,
   }),
   trustedOrigins: [env.CORS_ORIGIN],
+  advanced: {
+    ipAddress: {
+      // Prefer platform/proxy headers; without a resolvable IP Better Auth still
+      // rate-limits via a shared per-path bucket (does not skip counting).
+      ipAddressHeaders: ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"],
+      ...(trustedProxies.length > 0 ? { trustedProxies } : {}),
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: shouldRequireEmailVerification(),

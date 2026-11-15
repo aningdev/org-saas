@@ -23,6 +23,12 @@ export const serverEnvSchema = {
     .enum(["true", "false"])
     .optional()
     .transform((value) => value === "true"),
+  /**
+   * Comma-separated proxy IPs/CIDRs that may append `X-Forwarded-For`.
+   * Required behind a reverse proxy so Better Auth rate limits use the real client IP
+   * instead of a shared no-IP bucket (or a client-spoofed leftmost hop).
+   */
+  AUTH_TRUSTED_PROXIES: z.string().min(1).optional(),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
   NODE_ENV: z.enum(["dev", "development", "prod", "production", "test"]).default("dev"),
 };

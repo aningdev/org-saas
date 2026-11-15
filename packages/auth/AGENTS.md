@@ -4,7 +4,7 @@
 
 Better Auth 服务端配置，提供邮箱密码认证、会话、组织与团队插件。
 
-- `src/index.ts`：数据库 adapter、插件和组织配置（含 database `rateLimit`、邮箱验证／重置发送钩子）。
+- `src/index.ts`：数据库 adapter、插件和组织配置（含 database `rateLimit`、`advanced.ipAddress`、邮箱验证／重置发送钩子）。
 - `src/email.ts`：Resend 发信封装；未配置时静默跳过且不记录 token／收件人。密码重置启用 `revokeSessionsOnPasswordReset`。
 - `src/audit-schema.ts`：向 Better Auth 注册自定义 `auditLog` 模型（物理表在 DB schema）；缺此插件时 `adapter.create({ model: "auditLog" })` 会失败。
 - `src/organization-has-permission.ts`：对官方 `auth.api.hasPermission` 的薄封装，供 API access-context 等复用。
