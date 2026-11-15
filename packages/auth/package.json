@@ -13,7 +13,8 @@
     }
   },
   "scripts": {
-    "bootstrap:platform-admin": "bun run ./scripts/bootstrap-platform-admin.ts"
+    "bootstrap:platform-admin": "bun run ./scripts/bootstrap-platform-admin.ts",
+    "inventory:auth": "bun run ./scripts/inventory-auth-state.ts"
   },
   "dependencies": {
     "@better-auth/core": "catalog:",

@@ -13,8 +13,8 @@ export async function submitSignIn(page: Page, credentials: Credentials) {
   await page.getByRole("button", { name: "Already have an account? Sign In" }).click();
   await page.getByLabel("Email", { exact: true }).fill(credentials.email);
   await page.getByLabel("Password", { exact: true }).fill(credentials.password);
-  // Better Auth 1.7.7 limits sign-in to three requests in a sliding 10s window.
-  // All local browsers share one IP bucket, so space submissions without retrying failures.
+  // Better Auth sign-in custom rule: 5 requests / 60s (database storage).
+  // All local browsers share one IP bucket; keep a short gap without retrying failures.
   const remaining = lastSignInCompletedAt + authenticationWindowMs - Date.now();
   if (remaining > 0) await setTimeout(remaining);
   const responsePromise = page.waitForResponse(

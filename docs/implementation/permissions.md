@@ -158,7 +158,7 @@
 - [x] 必须显式提供 `DATABASE_URL`、`PLATFORM_ADMIN_BOOTSTRAP_USER_ID`、`PLATFORM_ADMIN_BOOTSTRAP_USER_EMAIL` 和 `PLATFORM_ADMIN_BOOTSTRAP_CONFIRM=INITIALIZE_PLATFORM_ADMIN`，并满足服务端环境校验。
 - [x] 脚本要求 ID 与邮箱匹配、邮箱已验证、账号未封禁且当前角色为默认 `user`；使用事务锁保证并发执行串行，已有其他平台管理员时拒绝。
 - [x] 直接 Better Auth HTTP 与 `auth.api.*` 的平台角色授予均经测试拒绝；受控流程重复执行与已有管理员场景见[验证结果](permissions-validation.md)。
-- [ ] 目标数据库模型应用和存量授权处置：等待确认准确环境及持久化数据范围。
+- [ ] 目标数据库模型应用和存量授权处置：等待确认准确环境及持久化数据范围。步骤与 `inventory:auth` 见 [部署运维清单](deploy-ops.md)。
 
 完成条件：新环境可受控初始化；验证范围、Fumadocs 检查阻塞和数据库部署边界已有记录。目标数据库执行仍遵循第 8 节。
 

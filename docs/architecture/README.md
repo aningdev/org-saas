@@ -25,13 +25,13 @@
 
 ## 文档职责
 
-| 文档类型 | 内容                                     | 入口                                                                                                                         |
-| -------- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| 架构     | 系统职责、关系、约束、运行机制与设计取舍 | 本目录的专题文档                                                                                                             |
-| 领域词汇 | 概念定义                                 | [GLOSSARY.md](GLOSSARY.md)                                                                                                   |
-| 开发约定 | 编码与验证时必须遵守的规则               | [根约定](../../AGENTS.md)、各应用和包的 `AGENTS.md`                                                                          |
-| 决策记录 | 难以逆转或容易被误解的设计选择及原因     | [`docs/adr/`](../adr/)，含 [组织归档](../adr/0001-archive-organizations.md)、[Solid / ui-sdk](../adr/0003-solid-2-ui-sdk.md) |
-| 实施计划 | 改动入口、阶段、模型处理、验收与待办     | [权限体系](../implementation/permissions.md)、[Web 路由重构](../implementation/web-routing.md)                               |
+| 文档类型 | 内容                                     | 入口                                                                                                                                        |
+| -------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 架构     | 系统职责、关系、约束、运行机制与设计取舍 | 本目录的专题文档                                                                                                                            |
+| 领域词汇 | 概念定义                                 | [GLOSSARY.md](GLOSSARY.md)                                                                                                                  |
+| 开发约定 | 编码与验证时必须遵守的规则               | [根约定](../../AGENTS.md)、各应用和包的 `AGENTS.md`                                                                                         |
+| 决策记录 | 难以逆转或容易被误解的设计选择及原因     | [`docs/adr/`](../adr/)，含 [组织归档](../adr/0001-archive-organizations.md)、[Solid / ui-sdk](../adr/0003-solid-2-ui-sdk.md)                |
+| 实施计划 | 改动入口、阶段、模型处理、验收与待办     | [权限体系](../implementation/permissions.md)、[部署运维](../implementation/deploy-ops.md)、[Web 路由重构](../implementation/web-routing.md) |
 
 当前不单独维护 `docs/development/`。异常反馈的目标设计见 [异常反馈](error-feedback.md)；Web 的加载、缓存更新、表单、对话框和错误反馈编码规则放在 [Web 约定](../../apps/web/AGENTS.md)；主站 UI 封装约定见同一文件的 ui-sdk 节。技能库默认的 `docs/ARCHITECTURE.md` / `docs/GLOSSARY.md` 在本仓是指向本目录的指针；Stack／Layout／Layers／Seams 写在 [代码组织](code-organization.md)，根目录 Layout 由 `scripts/check-layout.ts` 在 `bun run check` 中强制。决策记录目录名为 `docs/adr/`（非 `docs/decisions/`）。未来出现需要独立讲解的长篇教程时，再增加指南，并从对应约定链接过去。
 

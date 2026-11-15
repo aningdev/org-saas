@@ -65,6 +65,7 @@
     "db:generate": "vp run --filter @org-saas/db db:generate",
     "db:migrate": "vp run --filter @org-saas/db db:migrate",
     "audit:prune": "vp run --filter @org-saas/db audit:prune",
+    "inventory:auth": "vp run --filter @org-saas/auth inventory:auth",
     "check": "bun scripts/check-layout.ts && vp check",
     "fix": "vp check --fix",
     "test": "vp test",

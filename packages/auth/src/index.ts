@@ -9,6 +9,7 @@ import { organization } from "better-auth/plugins/organization";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { auditSchemaPlugin } from "./audit-schema";
+import { sendTransactionalEmail, shouldRequireEmailVerification } from "./email";
 import { createOrganizationPolicyPlugin } from "./organization-policy";
 import { withOrganizationMutationTransactions } from "./organization-transaction";
 import { ac, roles } from "./permissions";
@@ -57,6 +58,37 @@ const authInstance = betterAuth({
   trustedOrigins: [env.CORS_ORIGIN],
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: shouldRequireEmailVerification(),
+    sendResetPassword: async ({ user, url }) => {
+      await sendTransactionalEmail({
+        to: user.email,
+        subject: "Reset your password",
+        text: `Click the link to reset your password:\n\n${url}\n`,
+      });
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendTransactionalEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        text: `Click the link to verify your email:\n\n${url}\n`,
+      });
+    },
+  },
+  // Database storage so multi-instance / serverless deploys share counters.
+  // Distinct from oRPC `MemoryRateLimiter` on business RPC.
+  rateLimit: {
+    enabled: true,
+    storage: "database",
+    window: 10,
+    max: 100,
+    customRules: {
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60, max: 5 },
+      "/request-password-reset": { window: 60, max: 3 },
+      "/send-verification-email": { window: 60, max: 3 },
+    },
   },
   session: {
     additionalFields: {
