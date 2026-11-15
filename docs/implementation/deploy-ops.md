@@ -17,7 +17,7 @@
 | `PLATFORM_ADMIN_BOOTSTRAP_*` | 仅 bootstrap | 见下一节                                                 |
 | `LOG_LEVEL` / `NODE_ENV`     | 否           | 默认值见 `packages/env`；对外部署用 `production`／`prod` |
 
-Auth 限流在 `NODE_ENV !== "test"` 时显式开启，使用 **database** 存储（`rateLimit` 表），与 oRPC 进程内 `MemoryRateLimiter` 无关。**未**配置 `AUTH_TRUSTED_PROXIES` 时不采信客户端 `X-Forwarded-For`／`X-Real-IP`（防伪造换桶），限流落到共享 per-path 桶。反代后必须配置 `AUTH_TRUSTED_PROXIES`，才会按真实客户端 IP 分桶。IP 轮换／共享桶仍有上限绕过空间；邮件滥发需另配 CAPTCHA／供应商限额。
+Auth 限流在 `NODE_ENV !== "test"` 时显式开启，使用 **database** 存储（`rateLimit` 表），与 oRPC 进程内 `MemoryRateLimiter` 无关。**未**配置 `AUTH_TRUSTED_PROXIES` 时不采信任何转发头（防伪造换桶），限流落到共享 per-path 桶。反代后必须配置 `AUTH_TRUSTED_PROXIES`；此时头顺序为 `cf-connecting-ip` → `x-real-ip` → `x-forwarded-for`（XFF 靠可信代理链解析）。请确认反代覆盖／追加这些头，而不是原样转发客户端值。IP 轮换／共享桶仍有上限绕过空间；邮件滥发需另配 CAPTCHA／供应商限额。
 
 ## 2. Schema 与存量盘点（人工门禁）
 
