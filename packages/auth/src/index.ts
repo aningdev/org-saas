@@ -69,11 +69,11 @@ const authInstance = betterAuth({
     ipAddress:
       trustedProxies.length > 0
         ? {
-            // Prefer proxy-overwritten headers first. X-Forwarded-For is last and
-            // only safe with trustedProxies (BA walks the chain from the right).
-            // Putting XFF first would let a client-spoofed single value win when
-            // the proxy only sets X-Real-IP / CF-Connecting-IP.
-            ipAddressHeaders: ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"],
+            // Only X-Forwarded-For: BA walks the chain from the right using
+            // trustedProxies. Single-value headers (X-Real-IP, CF-Connecting-IP)
+            // are not chain-validated — listing them lets clients spoof a fresh
+            // rate-limit bucket when the proxy does not overwrite that header.
+            ipAddressHeaders: ["x-forwarded-for"],
             trustedProxies,
           }
         : { ipAddressHeaders: [] },
