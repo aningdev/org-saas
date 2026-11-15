@@ -77,10 +77,12 @@ const authInstance = betterAuth({
       });
     },
   },
-  // Enabled in production by Better Auth default; database storage so
-  // multi-instance deploys share counters. Distinct from oRPC MemoryRateLimiter.
-  // Do not force enabled in test/dev — HTTP sign-up suites would 429.
+  // Explicit enable: BA's default only treats NODE_ENV==="production", but this
+  // repo also allows "prod" and defaults to "dev". Keep off only for vitest
+  // (NODE_ENV=test) so CI HTTP sign-up suites do not 429. Database storage so
+  // multi-instance deploys share counters; distinct from oRPC MemoryRateLimiter.
   rateLimit: {
+    enabled: env.NODE_ENV !== "test",
     storage: "database",
     window: 10,
     max: 100,
