@@ -4,12 +4,16 @@
 
 Better Auth 服务端配置，提供邮箱密码认证、会话、组织与团队插件。
 
-- `src/index.ts`：数据库 adapter、插件和组织配置。
+- `src/index.ts`：数据库 adapter、插件和组织配置（含 database `rateLimit`、`advanced.ipAddress`、邮箱验证／重置发送钩子）。
+- `src/email.ts`：Resend 发信封装；未配置时静默跳过且不记录 token／收件人。密码重置启用 `revokeSessionsOnPasswordReset`。
 - `src/audit-schema.ts`：向 Better Auth 注册自定义 `auditLog` 模型（物理表在 DB schema）；缺此插件时 `adapter.create({ model: "auditLog" })` 会失败。
 - `src/organization-has-permission.ts`：对官方 `auth.api.hasPermission` 的薄封装，供 API access-context 等复用。
 - `src/session.ts`：从 Better Auth 解析请求 session 的请求级 lazy getter，供 API 与 TanStack Start 认证入口复用。
 - `src/permissions.ts`：资源、角色和访问控制定义（喂给 organization 插件的 `ac` / `roles`）。
+- `scripts/bootstrap-platform-admin.ts`：受控首位平台管理员初始化。
+- `scripts/inventory-auth-state.ts`：目标库只读授权盘点（`inventory:auth`）。
 - 客户端对应 `apps/web/src/lib/auth-client.ts`；HTTP 接入对应 `apps/web/src/routes/api/auth.$.ts`。
+- 部署、bootstrap、审计清理与邮件开关见 [部署运维清单](../../docs/implementation/deploy-ops.md)。
 
 ## 配置与维护边界
 

@@ -9,6 +9,7 @@ import { organization } from "better-auth/plugins/organization";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 
 import { auditSchemaPlugin } from "./audit-schema";
+import { sendTransactionalEmail, shouldRequireEmailVerification } from "./email";
 import { createOrganizationPolicyPlugin } from "./organization-policy";
 import { withOrganizationMutationTransactions } from "./organization-transaction";
 import { ac, roles } from "./permissions";
@@ -48,6 +49,11 @@ const organizationOptions = {
   roles,
 } as const;
 
+const trustedProxies = (env.AUTH_TRUSTED_PROXIES ?? "")
+  .split(",")
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+
 const authInstance = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -55,8 +61,59 @@ const authInstance = betterAuth({
     transaction: true,
   }),
   trustedOrigins: [env.CORS_ORIGIN],
+  advanced: {
+    // Only trust forwarded IP headers when AUTH_TRUSTED_PROXIES is set. Otherwise
+    // a client can send a single spoofed X-Forwarded-For / X-Real-IP and mint a
+    // fresh rate-limit bucket. With no headers, BA falls back to a shared
+    // per-path bucket (still counts; does not skip).
+    ipAddress:
+      trustedProxies.length > 0
+        ? {
+            // Only X-Forwarded-For: BA walks the chain from the right using
+            // trustedProxies. Single-value headers (X-Real-IP, CF-Connecting-IP)
+            // are not chain-validated — listing them lets clients spoof a fresh
+            // rate-limit bucket when the proxy does not overwrite that header.
+            ipAddressHeaders: ["x-forwarded-for"],
+            trustedProxies,
+          }
+        : { ipAddressHeaders: [] },
+  },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: shouldRequireEmailVerification(),
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendTransactionalEmail({
+        to: user.email,
+        subject: "Reset your password",
+        text: `Click the link to reset your password:\n\n${url}\n`,
+      });
+    },
+  },
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendTransactionalEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        text: `Click the link to verify your email:\n\n${url}\n`,
+      });
+    },
+  },
+  // Explicit enable: BA's default only treats NODE_ENV==="production", but this
+  // repo also allows "prod" and defaults to "dev". Keep off only for vitest
+  // (NODE_ENV=test) so CI HTTP sign-up suites do not 429. Database storage so
+  // multi-instance deploys share counters; distinct from oRPC MemoryRateLimiter.
+  rateLimit: {
+    enabled: env.NODE_ENV !== "test",
+    storage: "database",
+    window: 10,
+    max: 100,
+    customRules: {
+      "/sign-in/email": { window: 60, max: 5 },
+      "/sign-up/email": { window: 60, max: 5 },
+      "/request-password-reset": { window: 60, max: 3 },
+      "/send-verification-email": { window: 60, max: 3 },
+    },
   },
   session: {
     additionalFields: {

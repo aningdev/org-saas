@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/solid-query";
-import { useNavigate } from "@tanstack/solid-router";
+import { Link, useNavigate } from "@tanstack/solid-router";
 import { createSignal, Show } from "solid-js";
 import { z } from "zod";
 
@@ -102,7 +102,10 @@ export default function SignInForm(props: { redirectTo: string; onSwitchToSignUp
         </Button>
       </form>
 
-      <div class="mt-4 text-center">
+      <div class="mt-4 flex flex-col items-center gap-2 text-center">
+        <Button variant="link" render={(p) => <Link {...p} to="/forgot-password" />}>
+          Forgot password?
+        </Button>
         <Button
           variant="link"
           onClick={props.onSwitchToSignUp}
