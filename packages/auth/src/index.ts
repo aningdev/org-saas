@@ -59,6 +59,7 @@ const authInstance = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: shouldRequireEmailVerification(),
+    revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
       await sendTransactionalEmail({
         to: user.email,

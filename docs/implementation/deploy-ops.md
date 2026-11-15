@@ -62,6 +62,7 @@ bun run test:e2e
 
 ## 6. 邮件能力开关
 
-- 未设 `RESEND_API_KEY` / `EMAIL_FROM`：非生产环境将重置／验证链接打到日志；生产环境发送失败（fail closed）。
+- 未设 `RESEND_API_KEY` / `EMAIL_FROM`：事务邮件静默跳过（不写收件人／正文／token 到日志，也不向客户端抛导致枚举账号的错误）。重置／验证在无邮件时不会真正送达。
 - 设好邮件后再视需要打开 `REQUIRE_EMAIL_VERIFICATION=true`。
+- 密码重置成功后会 `revokeSessionsOnPasswordReset`，吊销该用户既有会话。
 - 密码重置页：`/forgot-password`、`/reset-password`。

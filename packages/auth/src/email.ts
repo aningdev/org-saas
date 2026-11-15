@@ -12,38 +12,38 @@ function mailConfigured(): boolean {
 
 /**
  * Sends transactional mail via Resend when configured.
- * Without credentials: logs in non-production, throws in production so auth flows fail closed.
+ * Never throws: callers must not leak delivery/config failures to unauthenticated
+ * clients (email enumeration). Never logs recipient, subject, or body (tokens).
  */
-export async function sendTransactionalEmail(input: SendEmailInput): Promise<void> {
+export async function sendTransactionalEmail(input: SendEmailInput): Promise<boolean> {
   if (!mailConfigured()) {
-    const message = `[auth-email] mail not configured; would send to=${input.to} subject=${input.subject}`;
-    if (env.NODE_ENV === "production" || env.NODE_ENV === "prod") {
-      throw new Error(
-        "Email delivery is not configured. Set RESEND_API_KEY and EMAIL_FROM before requiring email flows.",
-      );
-    }
-    console.info(message);
-    console.info(input.text);
-    return;
+    console.warn("[auth-email] mail not configured; transactional email skipped");
+    void input;
+    return false;
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${env.RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: env.EMAIL_FROM,
-      to: [input.to],
-      subject: input.subject,
-      text: input.text,
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Resend email failed (${response.status}): ${body.slice(0, 200)}`);
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: env.EMAIL_FROM,
+        to: [input.to],
+        subject: input.subject,
+        text: input.text,
+      }),
+    });
+    if (!response.ok) {
+      console.error(`[auth-email] Resend failed status=${response.status}`);
+      return false;
+    }
+    return true;
+  } catch {
+    console.error("[auth-email] Resend request failed");
+    return false;
   }
 }
 
